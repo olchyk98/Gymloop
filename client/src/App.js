@@ -24,7 +24,7 @@ const NeedleRoute = ({ path, condition, component: Component, redirect: Redirect
 	<Route
 		path={ path }
 		{ ...settings }
-		component={props => (condition) ? <Component { ...props } /> : <Redirect to={ Redirect } /> }
+		component={props => (condition) ? <Component { ...props } /> : <Redirect { ...props } to={ Redirect } /> }
 	/>
 );
 
@@ -33,7 +33,7 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.cookieID = cookieControl.get("authdata");
+    this.cookieID = cookieControl.get("userid");
   }
 
   render() {
