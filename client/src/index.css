@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css?family=Exo|Gothic+A1|Quicksand|Roboto');
+@import url('https://fonts.googleapis.com/css?family=Exo|Gothic+A1|Quicksand|Roboto|Lato');
+
+:root {
+  --dockheight:50px;
+  --dockhide-time:.45s;
+  --defaultborder:rgba(0, 0, 0, .025);
+}
 
 html, body {
   margin:0;
@@ -20,4 +26,8 @@ html, body {
   height:100vh;
   width:100vw;
   position:relative;
+}
+
+.rn.rn_nav {
+  height:calc(100vh - var(--dockheight));
 }

@@ -1,0 +1,189 @@
+.rn-home {
+    /* I cannot handle it using css grids. */
+    position:relative;
+    overflow:scroll;
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+}
+
+.rn-home-row {
+    min-height:180px;
+    height:100%;
+    width:100%;
+    display:flex;
+    position:relative;
+}
+
+.rn-home-block {
+    --padding:35px;
+
+    padding:var(--padding);
+    border:1px solid var(--defaultborder);
+    height:calc(100% - var(--padding) * 2);
+    width:calc(100% - var(--padding) * 2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+.rn-home-block > * {
+    flex-shrink:0;
+}
+
+.rn-home-mainact-title {
+    text-transform:uppercase;
+    color:rgba(0, 0, 0, .5);
+    font-family:"Exo";
+    font-size:.9em;
+}
+
+.rn-home-mainact-activity {
+    --margin:7.5px;
+
+    margin-top:var(--margin);
+    margin-bottom:var(--margin);
+    font-size:2.5em;
+    font-family:"Quicksand";
+    font-weight:400;
+}
+
+.rn-home-mainact-connections {
+    display:flex;
+    align-items:center;
+}
+
+.rn-home-mainact-connections-icon {
+    margin-right:5px;
+    color:aqua;
+}
+
+.rn-home-mainact-connections-text {
+    font-family:"Quicksand";
+    color:rgba(0, 0, 0, .75);
+    text-align:center;
+}
+
+.rn-home-activitygraph-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    font-family:"Lato";
+    margin-bottom:25px;
+}
+
+.rn-home-activitygraph-header-title {
+    font-size:1em;
+    color:rgba(0, 0, 0, .5);
+    text-transform:uppercase;
+}
+
+.rn-home-activitygraph-header-month {
+    font-size:.95em;
+    color:rgba(0, 0, 0, .35);
+}
+
+.rn-home-block-title {
+    font-family:"Lato";
+    font-weight:600;
+    color:rgba(0, 0, 0, .25);
+    -webkit-font-smoothing:antialiased;
+}
+
+.rn-home-block-info {
+    display:flex;
+    align-items:flex-end;
+    margin-top:2.5px;
+}
+
+.rn-home-block-info > * {
+    --margin:4px;
+
+    margin-left:var(--margin);
+    margin-right:var(--margin);
+}
+
+.rn-home-block-info-icon,
+.rn-home-block-info-metr {
+    --color:rgba(0, 0, 0, .45);
+    --shadow:0;
+
+    color:var(--color);
+    filter:drop-shadow(0px 0px var(--shadow) var(--color));
+}
+
+.rn-home-block-info-icon {
+    font-size:1.25em;
+    transition:.25s;
+}
+
+.rn-home-block.orange:hover .rn-home-block-info-icon {
+    --color:orange;
+    --shadow:.25px;
+}
+
+.rn-home-block.red:hover .rn-home-block-info-icon {
+    --color:red;
+    --shadow:.25px;
+}
+
+.rn-home-block.blue:hover .rn-home-block-info-icon {
+    --color:blue;
+    --shadow:.25px;
+}
+
+.rn-home-block.aqua:hover .rn-home-block-info-icon {
+    --color:aquamarine;
+    --shadow:.25px;
+}
+
+.rn-home-block-info-value {
+    color:rgba(0, 0, 0, .9);
+    font-size:2.25em;
+    font-family:"Lato";
+    position:relative;
+    bottom:-6px;
+}
+
+.rn-home-block-info-metr {
+    font-size:1em;
+    font-family:"Lato";
+    font-weight:500;
+    position:relative;
+    left:-2.5px;
+}
+
+.rn-home-navigation-icon {
+    font-size:2.25em;
+    color:rgba(0, 0, 0, .5);
+}
+
+.rn-home-navigation-title {
+    margin-top:5px;
+    margin-bottom:15px;
+    font-size:1.5em;
+    font-family:"Quicksand";
+}
+
+.rn-home-navigation-move {
+    height:32.5px;
+    width:135px;
+    border-radius:45px;
+    color:black;
+    font-family:"Quicksand";
+    font-size:.95em;
+    cursor:pointer;
+    border:1px solid rgba(0, 0, 0, .25);
+    transition:.25s;
+}
+
+.rn-home-navigation-move:hover {
+    background:rgba(0, 0, 0, .01);
+}
+
+.rn-home-navigation-move:active {
+    transition:.1s;
+    transform:scale(.95);
+}

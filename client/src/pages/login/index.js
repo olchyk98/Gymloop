@@ -257,7 +257,7 @@ class App extends Component {
                 login, password
             }
         }).then(({ data: { loginUser: b } }) => {
-            if(!b) return a("Internal unexpected error.");
+            if(!b) return a("Internal unexpected error, probably invalid login or password.");
 
             cookieControl.set("userid", b.id, 60);
             window.location.href = links["HOME_PAGE"].absolute;

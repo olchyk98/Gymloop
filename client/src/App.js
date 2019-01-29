@@ -7,6 +7,7 @@ import Login from './pages/login';
 // Stuff
 import { cookieControl } from './utils';
 import links from './links';
+import Nav from './pages/__forall__/dbar';
 
 // Router
 import { BrowserRouter } from 'react-router-dom';
@@ -17,7 +18,11 @@ import reducers from './reducers';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 
-const reduxStore = createStore(reducers);
+const reduxStore = createStore(
+  reducers,
+  {},
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
 
 //
 const NeedleRoute = ({ path, condition, component: Component, redirect: Redirect, ...settings }) => (
@@ -50,6 +55,12 @@ class App extends Component {
 									exact
               />
             </Switch>
+
+            {
+              (this.cookieID) ? (
+                <Nav />
+              ) : null
+            }
           </Fragment>
         </BrowserRouter>
       </Provider>
