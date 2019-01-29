@@ -6,8 +6,13 @@ const {
     GraphQLString,
     GraphQLList,
     GraphQLNonNull,
-    GraphQLBoolean
+    GraphQLBoolean,
+    GraphQLInt
 } = require('graphql');
+
+const {
+    AuthenticationError
+} = require('apollo-server');
 
 const {
     User
@@ -25,10 +30,22 @@ function generateNoise(l = 256) {
 	return a;
 }
 
+function getDayDate() { // WARNING: Check freq - use PUSH instead of ADDTOSET
+    // Thanks: https://stackoverflow.com/questions/2013255/how-to-get-year-month-day-from-a-date-object
+    const a = new Date,
+          b = a.getUTCMonth() + 1;
+          c = a.getUTCDate();
+          d = a.getUTCFullYear();
+
+    newdate = `${ d }/${ b }/${ c }`; // 2019/04/21
+}
+
 const str = a => a.toString();
 
 // TODO: Connection model
 // TODO: Activity model
+// TODO: Training model
+// TODO: Sleep session model -> sleep qua, time, did you wke
 
 // !IN
 const UserType = new GraphQLObjectType({
@@ -39,13 +56,74 @@ const UserType = new GraphQLObjectType({
         password: { type: GraphQLString },
         email: { type: GraphQLString },
         mainActivity: { type: GraphQLString },
-        // getActivies
-        // getActiviesGraph
         firstLogin: { type: GraphQLString },
         authTokens: { type: new GraphQLList(GraphQLString) },
         lastAuthToken: {
             type: GraphQLString,
             resolve: ({ authTokens: a }) => a.slice(-1)[0]
+        },
+        weight: { type: GraphQLInt },
+        actions: { type: new GraphQLList(GraphQLInt) },
+        actionsMonthGraph: {
+            type: new GraphQLList(GraphQLInt),
+            resolve({ actions }) {
+                // !:PUSH >> fun getDayDate
+                // IDEA: Move this part to the front-end
+                    // PROBLEM: The actions array can contain a lot of values, so it's bad for plt. 
+
+                { // Get all values that added during the last 30 days
+                    let aa = +new Date - 2678400000; // current timestamp - 30 days in milliseconds
+                    var a = actions.filter(io => {
+                        return +new Date(io) >= aa;
+                    });
+                }
+
+                // Generate freq array
+                // [1, 4, 1, 2, 1, 1, 1] -> [{ value: 1, found: 5 }, { value: 4, found: 1 }, ...]
+                a = a.map(io => {
+                    // Get number of values that describes the same date
+                    const values = a.filter(ik => ik === io).length;
+                    a = a.filter(ik => ik !== io);
+                    return ({
+                        day: io,
+                        values
+                    });
+                });
+                a = a.filter(io => io.values);
+
+                if(a.length < 30) { // Fill up array // XXX: Very dirty // NEEDOPTIMIZATION
+                    let aa = [];
+
+                    const currentTime = +new Date;
+
+                    for(let ma = 0; ma < 30; ma++) {
+                        const a_a = new Date(currentTime + ma * 86400000),
+                            a_b = a_a.getUTCMonth() + 1;
+                            a_c = a_a.getUTCDate();
+                            a_d = a_a.getUTCFullYear();
+                
+                    aa.push(`${ a_d }/${ a_b }/${ a_c }`);
+                    }
+
+                    let ab = [];
+                    const ac = a.map(io => io.day);
+
+                    aa.forEach(io => {
+                        if(ac.findIndex(ik => ik === io) !== -1) {
+                            ab.push(a.find(ik => ik.day === io));
+                        } else { // add empty day
+                            ab.push({
+                                day: io,
+                                values: 0
+                            });
+                        }
+                    });
+
+                    a = ab;
+                }
+
+                return a;
+            }
         }
     }
 });
@@ -56,6 +134,19 @@ const RootQuery = new GraphQLObjectType({
         users: {
             type: new GraphQLList(UserType),
             resolve: () => User.find({})
+        },
+        user: {
+            type: UserType,
+            args: {
+                targetID: { type: GraphQLID }
+            },
+            async resolve(_, { targetID }, { req }) {
+                if(!req.session.id || !req.session.authToken) {
+                    throw new AuthenticationError("Invalid auth data");
+                }
+
+                return User.findById(targetID || req.session.id);
+            }
         },
         validateUserLogin: {
             type: GraphQLBoolean,
@@ -90,7 +181,11 @@ const RootMutation = new GraphQLObjectType({
                     email: "",
                     mainActivity: "",
                     firstLogin: new Date,
-                    authTokens: [token]
+                    authTokens: [token],
+                    weight: 0,
+                    actions: [
+                        +new Date
+                    ]
                 })).save();
                 
                 req.session.id = str(user._id);

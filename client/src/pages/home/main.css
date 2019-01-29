@@ -63,6 +63,12 @@
     font-family:"Quicksand";
     color:rgba(0, 0, 0, .75);
     text-align:center;
+    display:flex;
+    align-items:center;
+}
+
+.rn-home-mainact-connections-text > strong {
+    margin-right:4px;
 }
 
 .rn-home-activitygraph-header {
@@ -186,4 +192,21 @@
 .rn-home-navigation-move:active {
     transition:.1s;
     transform:scale(.95);
+}
+
+.rn-home-placeholdermm {
+    --margin:5px;
+
+    height:40px;
+    width:120px;
+    border-radius:5px;
+    overflow:hidden;
+    position:relative;
+    margin-left:var(--margin);
+    margin-right:var(--margin);
+}
+
+.rn-home-placeholdermm > img {
+    height:100%;
+    width:100%;
 }

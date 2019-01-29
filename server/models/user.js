@@ -7,7 +7,9 @@ const UserSchema = new Schema({
     email: String,
     mainActivity: String,
     firstLogin: Date,
-    authTokens: Array
+    authTokens: Array,
+    weight: Number,
+    actions: Array
 });
 
 module.exports = mongoose.model("User", UserSchema);

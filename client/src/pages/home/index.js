@@ -2,7 +2,17 @@ import React, { Component } from 'react';
 import './main.css';
 
 import { connect } from 'react-redux';
+import { gql } from 'apollo-boost';
 import { AreaChart } from 'react-easy-chart';
+
+import client from '../../apollo';
+import placeholderGIF from '../__forall__/placeholder.gif';
+
+const Placeholder = ({ _style }) => (
+    <div style={ _style } className="rn-home-placeholdermm">
+        <img src={ placeholderGIF } alt="placeholder" />
+    </div>
+);
 
 class Hero extends Component {
     constructor(props) {
@@ -10,12 +20,39 @@ class Hero extends Component {
 
         this.state = {
             activityGraph_ww: null,
-            routingLink: ""
+            routingLink: "",
+            userData: false
         }
     }
 
     componentDidMount() {
         this.props.notifyLoaded();
+        this.loadData();
+    }
+
+    loadData = () => {
+        client.query({
+            query: gql`
+                query {
+                    user {
+                        id,
+                        mainActivity
+                    }
+                }
+            `
+        }).then(({ data: { user: a } }) => {
+            if(!a) return console.error("Looks like it's an auth problem.");
+            
+            a.mainActivity = (
+                {
+                    "RUN_ACTIVITY": "Run"
+                }[a.mainActivity] || "?"
+            );
+
+            this.setState(() => ({
+                userData: a
+            }));
+        }).catch(console.error);
     }
 
     render() {
@@ -26,15 +63,37 @@ class Hero extends Component {
                         <span className="rn-home-mainact-title">
                             Your main activity is
                         </span>
-                        <h2 className="rn-home-mainact-activity">Run</h2>
-                        <div className="rn-home-mainact-connections">
-                            <div className="rn-home-mainact-connections-icon">
-                                <i className="fas fa-running" />
-                            </div>
-                            <span className="rn-home-mainact-connections-text">
-                                <strong>0</strong> connections have the same main activity
-                            </span>
-                        </div>
+                        {
+                            (this.state.userData !== false) ? (
+                                <h2 className="rn-home-mainact-activity">{ this.state.userData.mainActivity }</h2>
+                            ) : (
+                                <Placeholder />
+                            )
+                        }
+                        {
+                            (!this.state.userData || this.state.userData.mainActivity !== "?") ? (
+                                <div className="rn-home-mainact-connections">
+                                    <div className="rn-home-mainact-connections-icon">
+                                        <i className="fas fa-running" />
+                                    </div>
+                                    <span className="rn-home-mainact-connections-text">
+                                        {
+                                            (this.state.userData !== false) ? (
+                                                <strong>0</strong>
+                                            ) : (
+                                                <Placeholder
+                                                    _style={{
+                                                        height: "25px",
+                                                        width: "25px"
+                                                    }}
+                                                />
+                                            )
+                                        }
+                                        connections have the same main activity
+                                    </span>
+                                </div>
+                            ) : null
+                        }
                     </div>
                     <div className="rn-home-block rn-home-activitygraph" ref={ref => {
                         if(!this.state.activityGraph_ww) {
@@ -47,34 +106,45 @@ class Hero extends Component {
                             <span className="rn-home-activitygraph-header-title">Month activity</span>
                             <span className="rn-home-activitygraph-header-month">February 2019</span>
                         </div>
-                        <AreaChart // get width and height by parent bounding rect sizes
-                            // dataPoints
-                            areaColors={ ['blue'] }
-                            interpolate="cardinal"
-                            width={ this.state.activityGraph_ww || 0 }
-                            height={ 100 }
-                            data={[
-                                [
-                                    { x: 10, y: 25 },
-                                    { x: 20, y: 10 },
-                                    { x: 30, y: 25 },
-                                    { x: 40, y: 10 },
-                                    { x: 50, y: 12 },
-                                    { x: 60, y: 25 },
-                                    { x: 70, y: 245 },
-                                    { x: 80, y: 25 },
-                                    { x: 90, y: 25 },
-                                    { x: 100, y: 25 },
-                                    { x: 110, y: 25 },
-                                    { x: 120, y: 25 },
-                                    { x: 130, y: 25 },
-                                    { x: 140, y: 25 },
-                                    { x: 150, y: 25 },
-                                    { x: 160, y: 25 },
-                                    { x: 170, y: 25 },
-                                ]
-                            ]}
-                        />
+                        {
+                            (this.state.userData !== false) ? (
+                                <AreaChart
+                                    // dataPoints
+                                    areaColors={ ['blue'] }
+                                    interpolate="cardinal"
+                                    width={ this.state.activityGraph_ww || 0 }
+                                    height={ 100 }
+                                    data={[
+                                        [
+                                            { x: 10, y: 25 },
+                                            { x: 20, y: 10 },
+                                            { x: 30, y: 25 },
+                                            { x: 40, y: 10 },
+                                            { x: 50, y: 12 },
+                                            { x: 60, y: 25 },
+                                            { x: 70, y: 245 },
+                                            { x: 80, y: 25 },
+                                            { x: 90, y: 25 },
+                                            { x: 100, y: 25 },
+                                            { x: 110, y: 25 },
+                                            { x: 120, y: 25 },
+                                            { x: 130, y: 25 },
+                                            { x: 140, y: 25 },
+                                            { x: 150, y: 25 },
+                                            { x: 160, y: 25 },
+                                            { x: 170, y: 25 },
+                                        ]
+                                    ]}
+                                />
+                            ) : (
+                                <Placeholder
+                                    _style={{
+                                        height: "100px",
+                                        width: "100%"
+                                    }}
+                                />
+                            )
+                        }
                     </div>
                 </div>
                 <div className="rn-home-row">
@@ -84,7 +154,18 @@ class Hero extends Component {
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-fire" />
                             </div>
-                            <span className="rn-home-block-info-value">311</span>
+                            {
+                                (this.state.userData !== false) ? (
+                                    <span className="rn-home-block-info-value">311</span>
+                                ) : (
+                                    <Placeholder
+                                        _style={{
+                                            height: "50px",
+                                            width: "55px"
+                                        }}
+                                    />
+                                )
+                            }
                             <span className="rn-home-block-info-metr">cal</span>
                         </div>
                     </div>
@@ -94,7 +175,18 @@ class Hero extends Component {
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-weight-hanging" />
                             </div>
-                            <span className="rn-home-block-info-value">95</span>
+                            {
+                                (this.state.userData !== false) ? (
+                                    <span className="rn-home-block-info-value">95</span>
+                                ) : (
+                                    <Placeholder
+                                        _style={{
+                                            height: "55px",
+                                            width: "55px"
+                                        }}
+                                    />
+                                )
+                            }
                             <span className="rn-home-block-info-metr">kg</span>
                         </div>
                     </div>
@@ -104,7 +196,18 @@ class Hero extends Component {
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-bed" />
                             </div>
-                            <span className="rn-home-block-info-value">9</span>
+                            {
+                                (this.state.userData !== false) ? (
+                                    <span className="rn-home-block-info-value">9</span>
+                                ) : (
+                                    <Placeholder
+                                        _style={{
+                                            height: "55px",
+                                            width: "55px"
+                                        }}
+                                    />
+                                )
+                            }
                             <span className="rn-home-block-info-metr">h</span>
                         </div>
                     </div>
@@ -114,7 +217,18 @@ class Hero extends Component {
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-circle-notch" />
                             </div>
-                            <span className="rn-home-block-info-value">15</span>
+                            {
+                                (this.state.userData !== false) ? (
+                                    <span className="rn-home-block-info-value">15</span>
+                                ) : (
+                                    <Placeholder
+                                        _style={{
+                                            height: "55px",
+                                            width: "55px"
+                                        }}
+                                    />
+                                )
+                            }
                             <span className="rn-home-block-info-metr">urs</span>
                         </div>
                     </div>
