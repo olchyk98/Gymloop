@@ -32,7 +32,7 @@ class Hero extends Component {
                                 <i className="fas fa-running" />
                             </div>
                             <span className="rn-home-mainact-connections-text">
-                                <strong>0</strong> connections have the same task activity
+                                <strong>0</strong> connections have the same main activity
                             </span>
                         </div>
                     </div>
@@ -79,7 +79,7 @@ class Hero extends Component {
                 </div>
                 <div className="rn-home-row">
                     <div className="rn-home-block rn-home-calories orange">
-                        <span className="rn-home-block-title">Calories in this month</span>
+                        <span className="rn-home-block-title">Calories this month</span>
                         <div className="rn-home-block-info">
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-fire" />
@@ -109,7 +109,7 @@ class Hero extends Component {
                         </div>
                     </div>
                     <div className="rn-home-block rn-home-friendsactivity aqua">
-                        <span className="rn-home-block-title">New connections in this month</span>
+                        <span className="rn-home-block-title">New connections this month</span>
                         <div className="rn-home-block-info">
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-circle-notch" />
