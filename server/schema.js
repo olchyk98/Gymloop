@@ -15,7 +15,9 @@ const {
 } = require('apollo-server');
 
 const {
-    User
+    User,
+    Sleep,
+    Training
 } = require('./models');
 
 // External functions
@@ -42,15 +44,13 @@ function getDayDate() { // WARNING: Check freq - use PUSH instead of ADDTOSET
 
 const str = a => a.toString();
 
-// TODO: Connection model
-// TODO: Activity model
 // TODO: Training model
 // TODO: Sleep session model -> sleep qua, time, did you wke
 
 // !IN
 const UserType = new GraphQLObjectType({
     name: "User",
-    fields: {
+    fields: () => ({
         id: { type: GraphQLID },
         login: { type: GraphQLString },
         password: { type: GraphQLString },
@@ -58,15 +58,72 @@ const UserType = new GraphQLObjectType({
         mainActivity: { type: GraphQLString },
         firstLogin: { type: GraphQLString },
         authTokens: { type: new GraphQLList(GraphQLString) },
+        connections: {
+            type: new GraphQLList(UserType),
+            resolve: ({ connections }) => User.find({
+                _id: {
+                    $in: connections
+                }
+            })
+        },
         lastAuthToken: {
             type: GraphQLString,
             resolve: ({ authTokens: a }) => a.slice(-1)[0]
         },
         weight: { type: GraphQLInt },
-        actions: { type: new GraphQLList(GraphQLInt) },
-        actionsMonthGraph: {
-            type: new GraphQLList(GraphQLInt),
-            resolve({ actions }) {
+        sleeps: {
+            type: new GraphQLList(SleepType),
+            resolve: ({ id }) => Sleep.find({ creatorID: id })
+        },
+        trainings: {
+            type: new GraphQLList(TrainingType),
+            resolve: ({ id }) => Training.find({
+                people: {
+                    $in: [str(id)]
+                }
+            })
+        },
+        monthCalories: {
+            type: GraphQLInt,
+            async resolve({ id }) {
+                // TODO: Calculate food calories
+
+                let a = await Training.find({
+                    startTime: {
+                        $gte: +new Date - 2678400000 // last 30 days
+                    },
+                    people: {
+                        $in: [str(id)]
+                    }
+                }).select("destroyedCalories");
+
+                return (a.length) ? a.reduce((a, { destroyedCalories: b }) => a + b) : 0;
+            }
+        },
+        avgSleepTime: {
+            type: GraphQLInt,
+            async resolve({ id }) { // XXX
+                const a = await Sleep.find({ creatorID: str(id) }).select("sleepHours");
+                return (a.length) ? a.reduce((a, { sleepHours: b }) => a + b) / a.length : 0;
+            }
+        },
+        connectionsInt: {
+            type: GraphQLInt,
+            async resolve({ id }) {
+                const a = Training.find({
+                    people: {
+                        $in: [str(id)]
+                    }
+                }).select("people");
+
+
+                return (a.length) ? a.reduce((a, { people: b }) => a + b.length - 1) : 0; // NOTE: - self
+            }
+        },
+        appActivity: { type: new GraphQLList(GraphQLString) },
+        appActivityMonthGraph: {
+            type: new GraphQLList(GraphQLInt), // !IDEA: Scan days - arg
+            resolve({ appActivity: actions }) {
                 // !:PUSH >> fun getDayDate
                 // IDEA: Move this part to the front-end
                     // PROBLEM: The actions array can contain a lot of values, so it's bad for plt. 
@@ -110,12 +167,9 @@ const UserType = new GraphQLObjectType({
 
                     aa.forEach(io => {
                         if(ac.findIndex(ik => ik === io) !== -1) {
-                            ab.push(a.find(ik => ik.day === io));
+                            ab.push(a.find(ik => ik.day === io).values);
                         } else { // add empty day
-                            ab.push({
-                                day: io,
-                                values: 0
-                            });
+                            ab.push(0);
                         }
                     });
 
@@ -125,7 +179,41 @@ const UserType = new GraphQLObjectType({
                 return a;
             }
         }
-    }
+    })
+});
+
+const SleepType = new GraphQLObjectType({
+    name: "Sleep",
+    fields: () => ({
+        id: { type: GraphQLID },
+        sleepHours: { type: GraphQLInt },
+        startTime: { type: GraphQLInt },
+        endTime: { type: GraphQLInt },
+        creatorID: { type: GraphQLID },
+        creator: {
+            type: UserType,
+            resolve: ({ creatorID }) => User.findById(creatorID)
+        }
+    })
+});
+
+const TrainingType = new GraphQLObjectType({
+    name: "Training",
+    fields: () => ({
+        id: { type: GraphQLID },
+        destroyedCalories: { type: GraphQLInt },
+        minutes: { type: GraphQLInt },
+        startTime: { type: GraphQLInt },
+        action: { type: GraphQLString },
+        people: {
+            type: new GraphQLList(UserType),
+            resolve: ({ people }) => User.find({
+                _id: {
+                    $in: people
+                }
+            })
+        }
+    })
 });
 
 const RootQuery = new GraphQLObjectType({
@@ -201,7 +289,13 @@ const RootMutation = new GraphQLObjectType({
                 password: { type: new GraphQLNonNull(GraphQLString) }
             },
             async resolve(_, { login, password }, { req }) {
-                let a = await User.findOne({ login, password });
+                let a = await User.findOne({
+                    $or: [
+                        { login },
+                        { email: login }
+                    ],
+                    password
+                });
 
                 const token = generateNoise();
 

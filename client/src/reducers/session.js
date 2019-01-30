@@ -5,6 +5,9 @@ export default function(state = {}, { type, payload }) {
         case 'NOTIFY_NEW_PAGE':
             a.currentPage = payload;
         break;
+        case 'CAST_GLOBAL_ERROR':
+            a.globalError = payload;
+        break;
         default:break;
     }
     

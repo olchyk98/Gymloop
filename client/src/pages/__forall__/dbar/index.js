@@ -3,10 +3,43 @@ import './main.css';
 
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { gql } from 'apollo-boost';
 
+import client from '../../../apollo';
 import links from '../../../links';
+import { cookieControl } from '../../../utils';
 
 class Hero extends Component {
+    componentDidMount() {
+        let cast = () => this.props.castAlert({
+            text: "Authentication error",
+            buttons: [
+                {
+                    icon: <i className="fas fa-door-closed" />,
+                    action() {
+                        cookieControl.delete("userid");
+                        window.location.reload();
+                    }
+                }
+            ]
+        });
+        
+        client.query({
+            query: gql`
+                query($targetID: ID!) {
+                    user(targetID: $targetID) {
+                        id
+                    }
+                }
+            `,
+            variables: {
+                targetID: cookieControl.get("userid")
+            }
+        }).then(({ data: { user: a } }) => {
+            if(!a) return cast();
+        }).catch(cast);
+    }
+
     render() {
         return(
             <div className="gl-nav">
@@ -36,6 +69,11 @@ const mapStateToProps = ({ session: { currentPage } }) => ({
     currentPage
 });
 
+const mapActionsToProps = {
+    castAlert: payload => ({ type: "CAST_GLOBAL_ERROR", payload })
+}
+
 export default connect(
-    mapStateToProps
+    mapStateToProps,
+    mapActionsToProps
 )(Hero);

@@ -36,23 +36,60 @@ class Hero extends Component {
                 query {
                     user {
                         id,
-                        mainActivity
+                        mainActivity,
+                        appActivityMonthGraph,
+                        monthCalories,
+                        weight,
+                        avgSleepTime,
+                        connectionsInt
                     }
                 }
             `
         }).then(({ data: { user: a } }) => {
             if(!a) return console.error("Looks like it's an auth problem.");
-            
+
+            // Activity
             a.mainActivity = (
                 {
                     "RUN_ACTIVITY": "Run"
                 }[a.mainActivity] || "?"
             );
 
+            // Actions Graph
+            a.actionsMonthGraph = a.appActivityMonthGraph.map((io, ia) => ({
+                x: ia * 10,
+                y: io
+            }));
+
+            // Weight
+            a.weight = a.weight || "?";
+
+            // Submit
             this.setState(() => ({
                 userData: a
             }));
         }).catch(console.error);
+    }
+
+    getMonthDate = () => { // OUTPUT: February 2019
+        const a = new Date(),
+              b = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ][a.getMonth()],
+              c = a.getFullYear();
+
+        return b + " " + c;
     }
 
     render() {
@@ -60,9 +97,12 @@ class Hero extends Component {
             <div className="rn rn_nav rn-home">
                 <div className="rn-home-row">
                     <div className="rn-home-block rn-home-mainact">
-                        <span className="rn-home-mainact-title">
-                            Your main activity is
-                        </span>
+                        <div className="rn-home-mainact-title">
+                            <span>Your main activity is</span>
+                            <button className="definp">
+                                <i className="fas fa-cog" />
+                            </button>
+                        </div>
                         {
                             (this.state.userData !== false) ? (
                                 <h2 className="rn-home-mainact-activity">{ this.state.userData.mainActivity }</h2>
@@ -96,15 +136,20 @@ class Hero extends Component {
                         }
                     </div>
                     <div className="rn-home-block rn-home-activitygraph" ref={ref => {
+                        if(!ref) return;
+
                         if(!this.state.activityGraph_ww) {
                             this.setState(() => ({
-                                activityGraph_ww: ref.getBoundingClientRect().width
+                                activityGraph_ww: (
+                                    ref.getBoundingClientRect().width -
+                                    parseInt(getComputedStyle(ref).padding) * 2
+                                )
                             }));
                         }
                     }}>
                         <div className="rn-home-activitygraph-header">
                             <span className="rn-home-activitygraph-header-title">Month activity</span>
-                            <span className="rn-home-activitygraph-header-month">February 2019</span>
+                            <span className="rn-home-activitygraph-header-month">{ this.getMonthDate() }</span>
                         </div>
                         {
                             (this.state.userData !== false) ? (
@@ -114,27 +159,7 @@ class Hero extends Component {
                                     interpolate="cardinal"
                                     width={ this.state.activityGraph_ww || 0 }
                                     height={ 100 }
-                                    data={[
-                                        [
-                                            { x: 10, y: 25 },
-                                            { x: 20, y: 10 },
-                                            { x: 30, y: 25 },
-                                            { x: 40, y: 10 },
-                                            { x: 50, y: 12 },
-                                            { x: 60, y: 25 },
-                                            { x: 70, y: 245 },
-                                            { x: 80, y: 25 },
-                                            { x: 90, y: 25 },
-                                            { x: 100, y: 25 },
-                                            { x: 110, y: 25 },
-                                            { x: 120, y: 25 },
-                                            { x: 130, y: 25 },
-                                            { x: 140, y: 25 },
-                                            { x: 150, y: 25 },
-                                            { x: 160, y: 25 },
-                                            { x: 170, y: 25 },
-                                        ]
-                                    ]}
+                                    data={[ this.state.userData.actionsMonthGraph ]}
                                 />
                             ) : (
                                 <Placeholder
@@ -149,14 +174,14 @@ class Hero extends Component {
                 </div>
                 <div className="rn-home-row">
                     <div className="rn-home-block rn-home-calories orange">
-                        <span className="rn-home-block-title">Calories this month</span>
+                        <span className="rn-home-block-title">Destroyed calories this month</span>
                         <div className="rn-home-block-info">
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-fire" />
                             </div>
                             {
                                 (this.state.userData !== false) ? (
-                                    <span className="rn-home-block-info-value">311</span>
+                                    <span className="rn-home-block-info-value">{ this.state.userData.monthCalories }</span>
                                 ) : (
                                     <Placeholder
                                         _style={{
@@ -170,14 +195,19 @@ class Hero extends Component {
                         </div>
                     </div>
                     <div className="rn-home-block rn-home-weight red">
-                        <span className="rn-home-block-title">Your current weight</span>
+                        <div className="rn-home-block-title rn-home-weight-title">
+                            <span>Your current weight</span>
+                            <button className="definp">
+                                <i className="fas fa-cog" />
+                            </button>
+                        </div>
                         <div className="rn-home-block-info">
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-weight-hanging" />
                             </div>
                             {
                                 (this.state.userData !== false) ? (
-                                    <span className="rn-home-block-info-value">95</span>
+                                    <span className="rn-home-block-info-value">{ this.state.userData.weight }</span>
                                 ) : (
                                     <Placeholder
                                         _style={{
@@ -198,7 +228,7 @@ class Hero extends Component {
                             </div>
                             {
                                 (this.state.userData !== false) ? (
-                                    <span className="rn-home-block-info-value">9</span>
+                                    <span className="rn-home-block-info-value">{ this.state.userData.avgSleepTime }</span>
                                 ) : (
                                     <Placeholder
                                         _style={{
@@ -212,14 +242,14 @@ class Hero extends Component {
                         </div>
                     </div>
                     <div className="rn-home-block rn-home-friendsactivity aqua">
-                        <span className="rn-home-block-title">New connections this month</span>
+                        <span className="rn-home-block-title">Your connections</span>
                         <div className="rn-home-block-info">
                             <div className="rn-home-block-info-icon">
                                 <i className="fas fa-circle-notch" />
                             </div>
                             {
                                 (this.state.userData !== false) ? (
-                                    <span className="rn-home-block-info-value">15</span>
+                                    <span className="rn-home-block-info-value">{ this.state.userData.connectionsInt }</span>
                                 ) : (
                                     <Placeholder
                                         _style={{
@@ -257,7 +287,7 @@ class Hero extends Component {
                         ].map(({ label, icon, title, routeButton }, index) => (
                             <div
                                 key={ index }
-                                className={ `rn-home-block rn-home-navigation${ (label === this.state.routingLink) }` }>
+                                className="rn-home-block rn-home-navigation">
                                 <div className="rn-home-navigation-icon">
                                     { icon }
                                 </div>

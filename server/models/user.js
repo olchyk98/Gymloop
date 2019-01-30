@@ -8,8 +8,9 @@ const UserSchema = new Schema({
     mainActivity: String,
     firstLogin: Date,
     authTokens: Array,
+    connections: Array,
     weight: Number,
-    actions: Array
+    appActivity: Array
 });
 
 module.exports = mongoose.model("User", UserSchema);

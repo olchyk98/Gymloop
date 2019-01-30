@@ -8,6 +8,7 @@ import Login from './pages/login';
 import { cookieControl } from './utils';
 import links from './links';
 import Nav from './pages/__forall__/dbar';
+import GlobalError from './pages/__forall__/global_error';
 
 // Router
 import { BrowserRouter } from 'react-router-dom';
@@ -61,6 +62,8 @@ class App extends Component {
                 <Nav />
               ) : null
             }
+
+            <GlobalError />
           </Fragment>
         </BrowserRouter>
       </Provider>

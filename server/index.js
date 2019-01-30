@@ -39,7 +39,10 @@ server.applyMiddleware({
     app,
     path: '/graphql',
     cors: {
-        origin: 'http://localhost:3000',
+        origin: [ // NOTE: Wow. I didn't know that I can use few urls :)
+            'http://localhost:3000',
+            'http://192.168.10.170:3000'
+        ],
         credentials: true
     }
 });

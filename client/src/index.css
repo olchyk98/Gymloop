@@ -31,3 +31,21 @@ html, body {
 .rn.rn_nav {
   height:calc(100vh - var(--dockheight));
 }
+
+/* media queries */
+@media only screen and (max-width: 770px) {
+  .rn-home,
+  .rn-home-row {
+    display:block!important;
+  }
+
+  .rn-home-row {
+    flex-direction:column!important;
+    height:auto!important;
+  }
+
+  .rn-home-block {
+    height:auto!important;
+    flex-shrink:0!important;
+  }
+}
