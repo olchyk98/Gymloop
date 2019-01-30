@@ -10,7 +10,8 @@ const UserSchema = new Schema({
     authTokens: Array,
     connections: Array,
     weight: Number,
-    appActivity: Array
+    appActivity: Array,
+    heightCM: Number
 });
 
 module.exports = mongoose.model("User", UserSchema);

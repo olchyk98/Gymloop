@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 // Pages
 import Home from './pages/home';
 import Login from './pages/login';
+import FoodStats from './pages/foodStats';
 
 // Stuff
 import { cookieControl } from './utils';
@@ -52,6 +53,13 @@ class App extends Component {
 									path={ links["HOME_PAGE"].route }
 									condition={ this.cookieID }
 									component={ Home }
+									redirect={ Login }
+									exact
+              />
+              <NeedleRoute
+									path={ links["FOOD_STATS_PAGE"].route }
+									condition={ this.cookieID }
+									component={ FoodStats }
 									redirect={ Login }
 									exact
               />

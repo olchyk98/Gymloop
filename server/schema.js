@@ -56,6 +56,7 @@ const UserType = new GraphQLObjectType({
         password: { type: GraphQLString },
         email: { type: GraphQLString },
         mainActivity: { type: GraphQLString },
+        heightCM: { type: GraphQLInt },
         firstLogin: { type: GraphQLString },
         authTokens: { type: new GraphQLList(GraphQLString) },
         connections: {
@@ -128,12 +129,11 @@ const UserType = new GraphQLObjectType({
                 // IDEA: Move this part to the front-end
                     // PROBLEM: The actions array can contain a lot of values, so it's bad for plt. 
 
-                { // Get all values that added during the last 30 days
-                    let aa = +new Date - 2678400000; // current timestamp - 30 days in milliseconds
-                    var a = actions.filter(io => {
-                        return +new Date(io) >= aa;
-                    });
-                }
+                // Get all values that added during the last 30 days
+                const tmpMonth = +new Date - 2592000000; // current timestamp - 30 days in milliseconds
+                let a = actions.filter(io => {
+                    return +new Date(io) >= tmpMonth;
+                });
 
                 // Generate freq array
                 // [1, 4, 1, 2, 1, 1, 1] -> [{ value: 1, found: 5 }, { value: 4, found: 1 }, ...]
@@ -148,33 +148,30 @@ const UserType = new GraphQLObjectType({
                 });
                 a = a.filter(io => io.values);
 
-                if(a.length < 30) { // Fill up array // XXX: Very dirty // NEEDOPTIMIZATION
-                    let aa = [];
+                // Fill up array // XXX: Very dirty
+                let aa = [];
 
-                    const currentTime = +new Date;
-
-                    for(let ma = 0; ma < 30; ma++) {
-                        const a_a = new Date(currentTime + ma * 86400000),
-                            a_b = a_a.getUTCMonth() + 1;
-                            a_c = a_a.getUTCDate();
-                            a_d = a_a.getUTCFullYear();
-                
+                for(let ma = 1; ma <= 30; ma++) {
+                    const a_a = new Date(tmpMonth + ma * 86400000),
+                        a_b = a_a.getUTCMonth() + 1;
+                        a_c = a_a.getUTCDate();
+                        a_d = a_a.getUTCFullYear();
+            
                     aa.push(`${ a_d }/${ a_b }/${ a_c }`);
-                    }
-
-                    let ab = [];
-                    const ac = a.map(io => io.day);
-
-                    aa.forEach(io => {
-                        if(ac.findIndex(ik => ik === io) !== -1) {
-                            ab.push(a.find(ik => ik.day === io).values);
-                        } else { // add empty day
-                            ab.push(0);
-                        }
-                    });
-
-                    a = ab;
                 }
+
+                let ab = [];
+                const ac = a.map(io => io.day);
+
+                aa.forEach(io => {
+                    if(ac.findIndex(ik => ik === io) !== -1) {
+                        ab.push(a.find(ik => ik.day === io).values);
+                    } else { // add empty day
+                        ab.push(0);
+                    }
+                });
+
+                a = ab;
 
                 return a;
             }
@@ -271,9 +268,10 @@ const RootMutation = new GraphQLObjectType({
                     firstLogin: new Date,
                     authTokens: [token],
                     weight: 0,
-                    actions: [
-                        +new Date
-                    ]
+                    appActivity: [
+                        getDayDate()
+                    ],
+                    heightCM: 0
                 })).save();
                 
                 req.session.id = str(user._id);
