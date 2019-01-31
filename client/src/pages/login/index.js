@@ -131,7 +131,7 @@ class Stage extends Component {
                                 _title="Type your email or login"
                                 _required={ true }
                                 criticalFail={ this.props.failed }
-                                isFetching={ this.state.isFetching }
+                                isFetching={ this.state.isFetching || this.props.isLoading }
                                 _onChange={ ({ value }) => this.setState({ login: value }) }
                             />
                             <TextInput
@@ -140,6 +140,7 @@ class Stage extends Component {
                                 _type="password"
                                 _title="Type your password"
                                 criticalFail={ this.props.failed }
+                                isFetching={ this.props.isLoading }
                                 _required={ true }
                                 _onChange={ ({ value }) => this.setState({ password: value }) }
                             />
@@ -167,7 +168,7 @@ class Stage extends Component {
                                 _required={ true }
                                 valid={ this.state.isValidLogin }
                                 criticalFail={ this.props.failed }
-                                isFetching={ this.state.isFetching }
+                                isFetching={ this.state.isFetching || this.props.isLoading }
                                 _onChange={ target => {
                                     this.setState({ login: target.value });
 
@@ -211,7 +212,7 @@ class Stage extends Component {
                                 _title="Type your password"
                                 _required={ true }
                                 _onChange={ ({ value }) => this.setState({ password: value }) }
-                                isFetching={ this.state.isFetching }
+                                isFetching={ this.state.isFetching || this.props.isLoading }
                                 criticalFail={ this.props.failed }
                             />
                             <button type="submit" title="Press to login" className="definp rn-login-forms-item-submit">
@@ -236,7 +237,9 @@ class App extends Component {
         this.state = {
             stage: "LOGIN_STAGE",
             loginFailed: false,
-            registerFailed: false
+            registerFailed: false,
+            loginFetching: false,
+            registerFetching: false
         }
     }
 
@@ -244,6 +247,11 @@ class App extends Component {
         let a = err => this.setState(() => ({
             loginFailed: true
         }), () => console.error(err));
+
+        this.setState(() => ({
+            loginFailed: false,
+            loginFetching: true
+        }));
 
         client.mutate({
             mutation: gql`
@@ -257,7 +265,12 @@ class App extends Component {
                 login, password
             }
         }).then(({ data: { loginUser: b } }) => {
-            if(!b) return a("Internal unexpected error, probably invalid login or password.");
+            if(!b) {
+                this.setState(() => ({
+                    loginFetching: false
+                }));
+                return a("Internal unexpected error, probably invalid login or password.");
+            }
 
             cookieControl.set("userid", b.id, 60);
             window.location.href = links["HOME_PAGE"].absolute;
@@ -268,6 +281,11 @@ class App extends Component {
         let a = err => this.setState(() => ({
             registerFailed: true
         }), () => console.error(err));
+
+        this.setState(() => ({
+            registerFailed: false,
+            registerFetching: true
+        }));
 
         client.mutate({
             mutation: gql`
@@ -282,7 +300,12 @@ class App extends Component {
                 password
             }
         }).then(({ data: { registerUser: b } }) => {
-            if(!b) return a("Internal unexpected error.");
+            if(!b) {
+                this.setState(() => ({
+                    registerFetching: false
+                }));
+                return a("Internal unexpected error.");
+            }
 
             cookieControl.set("userid", b.id, 60);
             window.location.href = links["HOME_PAGE"].absolute;
@@ -303,6 +326,7 @@ class App extends Component {
                         _onSubmit={ this.loginUser }
                         applyStage={ stage => this.setState({ stage }) }
                         currentStage={ this.state.stage }
+                        isLoading={ this.state.loginFetching }
                         failed={ this.state.loginFailed }
                     />
                     <Stage
@@ -310,6 +334,7 @@ class App extends Component {
                         _onSubmit={ this.registerUser }
                         applyStage={ stage => this.setState({ stage }) }
                         currentStage={ this.state.stage }
+                        isLoading={ this.state.registerFetching }
                         failed={ this.state.registerFailed }
                     />
                 </section>

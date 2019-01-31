@@ -43,6 +43,19 @@ class App extends Component {
     this.cookieID = cookieControl.get("userid");
   }
 
+  componentDidMount() {
+    // Detect OS
+    {
+      let a = "OTHER_OS";
+      
+      if(navigator.appVersion.indexOf("Mac")) a = "MAC";
+      else if(navigator.appVersion.indexOf("Win")) a = "WINDOWS";
+      else if(navigator.appVersion.indexOf("Linux")) a = "LINUX";
+
+      reduxStore.dispatch({ type: "SET_WORK_OS", payload: a });
+    }
+  }
+
   render() {
     return(
       <Provider store={ reduxStore }>

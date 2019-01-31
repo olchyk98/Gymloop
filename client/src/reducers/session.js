@@ -8,6 +8,9 @@ export default function(state = {}, { type, payload }) {
         case 'CAST_GLOBAL_ERROR':
             a.globalError = payload;
         break;
+        case 'SET_WORK_OS':
+            a.workOS = payload;
+        break;
         default:break;
     }
     

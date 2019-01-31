@@ -11,8 +11,9 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    position:relative;
+    position:fixed;
     z-index:700;
+    bottom:0;
 }
 
 .gl-nav.hide {

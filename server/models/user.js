@@ -11,7 +11,8 @@ const UserSchema = new Schema({
     connections: Array,
     weight: Number,
     appActivity: Array,
-    heightCM: Number
+    heightCM: Number,
+    caloriesPerDay: Number
 });
 
 module.exports = mongoose.model("User", UserSchema);

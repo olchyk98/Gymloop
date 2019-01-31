@@ -31,6 +31,11 @@ class Hero extends Component {
     }
 
     loadData = () => {
+        const onError = {
+            text: "Something is wrong",
+            buttons: []
+        }
+
         client.query({
             query: gql`
                 query {
@@ -46,7 +51,10 @@ class Hero extends Component {
                 }
             `
         }).then(({ data: { user: a } }) => {
-            if(!a) return console.error("Looks like it's an auth problem.");
+            if(!a) {
+                this.props.castAlert(onError);
+                return console.error("Looks like it's an auth problem.");
+            }
 
             // Activity
             a.mainActivity = (
@@ -68,7 +76,10 @@ class Hero extends Component {
             this.setState(() => ({
                 userData: a
             }));
-        }).catch(console.error);
+        }).catch(err => {
+            console.error(err);
+            this.props.castAlert(onError);
+        });
     }
 
     getMonthDate = () => { // OUTPUT: February 2019
@@ -305,7 +316,8 @@ class Hero extends Component {
 const mapStateToProps = () => ({});
 
 const mapActionsToProps = {
-    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "HOME_PAGE" })
+    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "HOME_PAGE" }),
+    castAlert: payload => ({ type: "CAST_GLOBAL_ERROR", payload })
 }
 
 export default connect(
