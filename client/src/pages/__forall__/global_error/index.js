@@ -16,7 +16,13 @@ class Hero extends Component {
     }
 
     componentDidUpdate(a) {
-        if(typeof a.banner !== typeof this.props.banner) {
+        if(
+            (!a.banner && this.props.banner) ||
+            (
+                this.props.banner &&
+                a.banner.text !== this.props.banner.text
+            )
+        ) {
             let a = this.props.banner,
                 b = {
                     active: !!a

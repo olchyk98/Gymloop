@@ -48,7 +48,7 @@
 
     height:12.5px;
     width:415px;
-    max-width:100%;
+    max-width:calc(100% - 50px);
     position:relative;
     border-radius:var(--borderr);
     background:rgba(0, 0, 0, .025);
@@ -64,6 +64,7 @@
     width:100%;
     background:transparent;
     background:linear-gradient(90deg, orange, yellow);
+    transition:.75s;
 }
 
 .rn-foodstats-header-progress-particle {
@@ -155,6 +156,7 @@
     bottom:0;
     height:35px;
     width:400px;
+    max-width:calc(100vw - var(--padding) * 2 - 15px);
     border:1px solid var(--defaultborder);
     border-bottom-color:transparent;
     border-radius:var(--borderr) var(--borderr) 0 0;
@@ -221,7 +223,7 @@
 }
 
 .rn-foodstats-meallist-item_container {
-    height:90px;
+    height:auto;
     width:100%;
     position:relative;
     display:flex;
@@ -247,6 +249,7 @@
 
     margin-top:var(--margin);
     margin-bottom:var(--margin);
+    flex-shrink:0;
 }
 
 .rn-foodstats-meallist-item-title {
@@ -254,6 +257,23 @@
     font-weight:600;
     color:rgba(0, 0, 0, .9);
     font-size:1.25em;
+}
+
+.rn-foodstats-meallist-item-dishes {
+    display:flex;
+    max-width:100%;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.rn-foodstats-meallist-item-dishes > span {
+    padding:5px;
+    background:rgba(0, 0, 0, .04);
+    color:rgba(0, 0, 0, .85);
+    font-family:"Quicksand";
+    font-weight:400;
+    font-size:.9em;
+    border-radius:2.5px;
 }
 
 .rn-foodstats-meallist-item-info {
@@ -297,6 +317,9 @@
 
     min-height:calc(500px - var(--padding) * 2);
     width:calc(400px - var(--padding) * 2);
+    max-height:calc(100vh - var(--padding));
+    max-width:calc(100vw - var(--padding));
+    overflow:scroll;
     background:white;
     position:fixed;
     top:50%;
@@ -315,7 +338,7 @@
 
 .rn-foodstats-recorderbg,
 .rn-foodstats-recorder {
-    --trans:1s;
+    --trans:.5s;
     
     opacity:0;
     visibility:hidden;

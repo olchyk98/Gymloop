@@ -21,7 +21,8 @@ class Hero extends Component {
                         window.location.reload();
                     }
                 }
-            ]
+            ],
+            highOrdered: true
         });
         
         client.query({

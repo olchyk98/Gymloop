@@ -3,9 +3,10 @@ const Schema = mongoose.Schema;
 
 const SleepSchema = new Schema({
     sleepHours: Number,
-    startTime: Number,
+    time: String,
     endTime: Number,
-    creatorID: String 
+    creatorID: String,
+    rating: String
 });
 
 module.exports = mongoose.model("Sleep", SleepSchema);

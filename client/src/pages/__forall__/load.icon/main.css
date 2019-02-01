@@ -1,0 +1,51 @@
+.gl-loadicon {
+    --margin:15px;
+
+    margin-top:var(--margin);
+    margin-bottom:var(--margin);
+    position:relative;
+    display:block;
+    width:45px;
+}
+
+.gl-loadicon > div {
+    --height:5px;
+
+    position:absolute;
+    top:0;
+    left:inherit;
+    right:inherit;
+    height:var(--height);
+    background:rebeccapurple;
+    border-radius:calc(var(--height) * 2);
+    width:0;
+    transform:translateX(0);
+    animation:gl-loadicon-process-inf-am 1.5s infinite ease-in-out;
+}
+
+@keyframes gl-loadicon-process-inf-am {
+    0% {
+        left:0;
+        right:inherit;
+        width:0;
+        transform:translateX(0);
+    }
+    20% {
+        left:0;
+        right:inherit;
+        width:100%;
+        transform:translateX(0);
+    }
+    40% {
+        left:inherit;
+        right:0;
+        width:100%;
+        transform:translateX(0);
+    }
+    60%, 80%, 100% {
+        left:inherit;
+        right:0;
+        width:0%;
+        transform:translateX(0);
+    }
+}

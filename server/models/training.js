@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const TrainingSchema = new Schema({
     destroyedCalories: Number,
     minutes: Number,
-    startTime: Number,
+    startTime: String,
     action: String,
     people: Array
 });

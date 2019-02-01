@@ -1,8 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import './main.css';
 
+import { gql } from 'apollo-boost';
 import { connect } from 'react-redux';
 import FlipMove from 'react-flip-move';
+
+import client from '../../apollo';
+
+import LoadIcon from '../__forall__/load.icon';
 
 class Header extends Component {
     constructor(props) {
@@ -60,6 +65,13 @@ class Header extends Component {
         }));
     }
 
+    getCSSProgress = () => {
+        const a = this.props.caloriesData;
+        if(!a) return '0%';
+        else
+            return 100 / (a.maxCalories / a.currCalories) + '%';
+    }
+
     render() {
         return(
             <header className="rn-foodstats-header">
@@ -71,7 +83,12 @@ class Header extends Component {
                 <h3 className="rn-foodstats-header-name">Oles Odynets</h3>
                 {/* progress */}
                 <div className="rn-foodstats-header-progress">
-                    <div className="rn-foodstats-header-progress-mat" />
+                    <div
+                        className="rn-foodstats-header-progress-mat"
+                        style={{
+                            width: this.getCSSProgress()
+                        }}
+                    />
                     <div className="rn-foodstats-header-progress-particle a" />
                     <div className="rn-foodstats-header-progress-particle b" />
                     <div className="rn-foodstats-header-progress-particle c" />
@@ -81,7 +98,14 @@ class Header extends Component {
                     {/* particles:> */}
                 </div>
                 {/* calories left - small dark */}
-                <span className="rn-foodstats-header-caloriesleft">311 calories left</span>
+                <span className="rn-foodstats-header-caloriesleft">
+                    {
+                        (this.props.caloriesData) ? (
+                            this.props.caloriesData.maxCalories -
+                            this.props.caloriesData.currCalories
+                        ) : 0
+                    } calories left
+                </span>
                 {/* record button */}
                 <button className="rn-foodstats-header-newmeal definp" onClick={ this.props.onRecord }>Record meal</button>
                 {/* days slider explorer :: center line */}
@@ -100,15 +124,28 @@ class Header extends Component {
 }
 
 class MealsListItem extends Component {
+    convertTime(time) {
+        const a = new Date(+time);
+
+        return a.getHours() + ":" + a.getMinutes();
+    }
+    
     render() {
         return(
             <div className="rn-foodstats-meallist-item_container">
                 <div className="rn-foodstats-meallist-item">
-                    <span className="rn-foodstats-meallist-item-title">Pizza Pasta</span>
+                    <span className="rn-foodstats-meallist-item-title">{ this.props.name }</span>
+                    <div className="rn-foodstats-meallist-item-dishes">
+                        {
+                            this.props.dishes.map((session, index) => (
+                                <span key={ index }>{ session }</span>
+                            ))
+                        }
+                    </div>
                     <div className="rn-foodstats-meallist-item-info">
-                        <span>13:21 AM</span>
+                        <span>{ this.convertTime(this.props.time) } AM</span>
                         <span>•</span>
-                        <span>231 calories</span>
+                        <span>{ this.props.calories } calories</span>
                     </div>
                 </div>
             </div>
@@ -120,7 +157,22 @@ class MealsList extends Component {
     render() {
         return(
             <section className="rn-foodstats-meallist">
-                <MealsListItem />
+                {
+                    (!this.props.addingItem) ? null : (
+                        <LoadIcon />
+                    )
+                }
+                {
+                    this.props.list.map(({ id, name, dishes, time, calories }) => (
+                        <MealsListItem
+                            key={ id }
+                            name={ name }
+                            dishes={ dishes }
+                            time={ time }
+                            calories={ calories }
+                        />
+                    ))
+                }
             </section>
         );
     }
@@ -162,7 +214,10 @@ class RecorderNameInput extends Component {
                 className="rn-foodstats-recorder-input definp"
                 placeholder={ this.props._placeholder }
                 type="text"
-                onKeyDown={ ({ keyCode }) => (keyCode !== 13) ? null : this.submit() }
+                onKeyDown={({ keyCode }) => {
+                    if([13, 188].includes(keyCode))
+                        this.submit()
+                }}
                 onChange={ ({ target: { value } }) => this.setState({ value }) }
                 onBlur={ this.submit }
                 value={ this.state.value }
@@ -240,8 +295,9 @@ class Recorder extends Component {
     }
 
     record = () => {
-        const { food, calories } = this.state; 
+        let { food, calories } = this.state; 
 
+        food = food.map(io => io.name)
         this.props.onRecord(food, calories);
     }
 
@@ -314,12 +370,106 @@ class Hero extends Component {
         super(props);
 
         this.state = {
-            recorder: false
+            recorder: false,
+            caloriesData: null,
+            mealToday: [],
+            addingMeal: false
         }
     }
 
     componentDidMount() {
         this.props.notifyLoaded();
+        this.loadData();
+    }
+
+    loadData = () => {
+        const castError = () => this.props.castAlert({ text: "Something went wrong" });
+
+        client.query({
+            query: gql`
+                query {
+                    user {
+                        id,
+                        caloriesPerDay,
+                        caloriesToday,
+                        getMeals {
+                            id,
+                            dishes,
+                            name,
+                            time,
+                            calories
+                        }
+                    }
+                }
+            `
+        }).then(({ data: { user: a } }) => {
+            if(!a) return castError();
+
+            this.setState({
+                caloriesData: {
+                    currCalories: (a.caloriesToday > a.caloriesPerDay) ? (
+                        a.caloriesPerDay
+                    ) : (
+                        a.caloriesToday
+                    ),
+                    maxCalories: a.caloriesPerDay
+                },
+                mealToday: a.getMeals
+            });
+        }).catch(e => {
+            console.error(e);
+            castError();
+        });
+    }
+
+    recordMeal = (dishes, calories) => {
+        this.setState(() => ({
+            recorder: false
+        }));
+
+        if(!dishes.length) return;
+
+        this.setState(() => ({
+            addingMeal: true
+        }));
+
+        const castError = () => this.props.castAlert({
+            text: "An error occured"
+        });
+
+        client.mutate({
+            mutation: gql`
+                mutation($dishes: [String!]!, $calories: Int!) {
+                    recordMeal(dishes: $dishes, calories: $calories) {
+                        id,
+                        dishes,
+                        name,
+                        time,
+                        calories
+                    }
+                }
+            `,
+            variables: {
+                dishes, calories
+            }
+        }).then(({ data: { recordMeal: a } }) => {
+            if(!a) return castError();
+
+            this.setState(({ mealToday, caloriesData }) => ({
+                mealToday: [
+                    a,
+                    ...mealToday
+                ],
+                addingMeal: false,
+                caloriesData: {
+                    ...caloriesData,
+                    currCalories: caloriesData.currCalories + a.calories
+                }
+            }))
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        })
     }
 
     render() {
@@ -327,12 +477,16 @@ class Hero extends Component {
             <div className="rn rn_nav rn-foodstats">
                 <Header
                     workOS={ this.props.workOS }
+                    caloriesData={ this.state.caloriesData }
                     onRecord={ () => this.setState({ recorder: true }) }
                 />
-                <MealsList />
+                <MealsList
+                    list={ this.state.mealToday }
+                    addingItem={ this.state.addingMeal }
+                />
                 <Recorder
                     active={ this.state.recorder }
-                    onRecord={ (food, calories) => null }
+                    onRecord={ this.recordMeal }
                     onClose={ () => this.setState({ recorder: false }) }
                 />
             </div>
@@ -345,7 +499,8 @@ const mapStateToProps = ({ session }) => ({
 });
 
 const mapActionsToProps = {
-    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "FOOD_STATS_PAGE" })
+    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "FOOD_STATS_PAGE" }),
+    castAlert: payload => ({ type: "CAST_GLOBAL_ERROR", payload })
 }
 
 export default connect(

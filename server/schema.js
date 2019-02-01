@@ -17,7 +17,8 @@ const {
 const {
     User,
     Sleep,
-    Training
+    Training,
+    Meal
 } = require('./models');
 
 // External functions
@@ -59,6 +60,50 @@ const UserType = new GraphQLObjectType({
         heightCM: { type: GraphQLInt },
         firstLogin: { type: GraphQLString },
         authTokens: { type: new GraphQLList(GraphQLString) },
+        getMeals: {
+            type: new GraphQLList(MealType),
+            // TODO: Day arg
+            async resolve({ id }) {
+                const time = +new Date;
+
+                return await Meal.find({
+                    creatorID: str(id),
+                    $and: [
+                        {time: {
+                            $gt: time - 86400000
+                        }},
+                        {time: {
+                            $lte: time
+                        }}
+                    ]
+                }).sort({ time: -1 });
+            }
+        },
+        caloriesPerDay: { type: GraphQLInt },
+        caloriesToday: {
+            type: GraphQLInt,
+            async resolve({ id }) {
+                const time = +new Date;
+
+                let a = await Meal.find({
+                    creatorID: str(id),
+                    $and: [
+                        {time: {
+                            $gt: time - 86400000
+                        }},
+                        {time: {
+                            $lte: time
+                        }}
+                    ]
+                }).select("calories");
+
+                return (a.length) ? (
+                    a
+                    .map(({ calories: a }) => +a)
+                    .reduce((a, b) => a + b)
+                ) : 0;
+            }
+        },
         connections: {
             type: new GraphQLList(UserType),
             resolve: ({ connections }) => User.find({
@@ -184,8 +229,9 @@ const SleepType = new GraphQLObjectType({
     fields: () => ({
         id: { type: GraphQLID },
         sleepHours: { type: GraphQLInt },
-        startTime: { type: GraphQLInt },
+        time: { type: GraphQLString },
         endTime: { type: GraphQLInt },
+        rating: { type: GraphQLString },
         creatorID: { type: GraphQLID },
         creator: {
             type: UserType,
@@ -200,7 +246,7 @@ const TrainingType = new GraphQLObjectType({
         id: { type: GraphQLID },
         destroyedCalories: { type: GraphQLInt },
         minutes: { type: GraphQLInt },
-        startTime: { type: GraphQLInt },
+        startTime: { type: GraphQLString },
         action: { type: GraphQLString },
         people: {
             type: new GraphQLList(UserType),
@@ -210,6 +256,18 @@ const TrainingType = new GraphQLObjectType({
                 }
             })
         }
+    })
+});
+
+const MealType = new GraphQLObjectType({
+    name: "Meal",
+    fields: () => ({
+        id: { type: GraphQLID },
+        creatorID: { type: GraphQLID },
+        calories: { type: GraphQLInt },
+        dishes: { type: new GraphQLList(GraphQLString) },
+        time: { type: GraphQLString },
+        name: { type: GraphQLString }
     })
 });
 
@@ -227,7 +285,7 @@ const RootQuery = new GraphQLObjectType({
             },
             async resolve(_, { targetID }, { req }) {
                 if(!req.session.id || !req.session.authToken) {
-                    throw new AuthenticationError("Invalid auth data");
+                    throw new AuthenticationError("Not authenticated");
                 }
 
                 return User.findById(targetID || req.session.id);
@@ -271,7 +329,8 @@ const RootMutation = new GraphQLObjectType({
                     appActivity: [
                         getDayDate()
                     ],
-                    heightCM: 0
+                    heightCM: 0,
+                    caloriesPerDay: 2000
                 })).save();
                 
                 req.session.id = str(user._id);
@@ -303,6 +362,71 @@ const RootMutation = new GraphQLObjectType({
                 }
 
                 return a;
+            }
+        },
+        recordMeal: {
+            type: MealType,
+            args: {
+                calories: { type: new GraphQLNonNull(GraphQLInt) },
+                dishes: {
+                    type: new GraphQLNonNull(
+                        new GraphQLList(new GraphQLNonNull(GraphQLString))
+                    )
+                } 
+            },
+            resolve(_, { calories, dishes }, { req }) {
+                if(!req.session.authToken || !req.session.id)
+                    throw new AuthenticationError("Not authenticated");
+
+                // Generate name
+                let a = ""; // WARNING: Should be empty|false|null here.
+                const nl = {
+                    "Fastfood": [
+                        "pizza",
+                        "cheeseburger"
+                    ],
+                    "Sugar": [
+                        "cake"
+                    ],
+                    "Breakfast": [
+                        "sandwich",
+                        "cacao",
+                        "coffee",
+                        "musli"
+                    ]
+                }
+
+                // NOTE: I hate this fucken IN operator. Burn in hell.
+                // Sorry, Steven, no optimization today.... sykablyat
+
+                Object.keys(nl).forEach(io => {
+                    if(a) return;
+
+                    const set = nl[io];
+                    let on = false;
+                    
+                    dishes.forEach(ia => {
+                        if(on) return;
+
+                        if(set.indexOf(ia.toLowerCase()) !== -1) { // Search value
+                            a = io;
+                            on = true;
+                        }
+                    });
+                });
+
+                if(!a) a = "Meal";
+
+                // Add to the database
+                const b = (new Meal({
+                    creatorID: str(req.session.id),
+                    calories, dishes,
+                    time: +new Date,
+                    name: a
+                })).save();
+
+                // Return item
+                return b;
             }
         }
     }

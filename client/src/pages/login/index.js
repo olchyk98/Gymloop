@@ -244,6 +244,11 @@ class App extends Component {
     }
 
     loginUser = ({ login, password }) => {
+        if(
+            !login.replace(/\s|\n/g, "").length ||
+            !password.replace(/\s|\n/g, "").length
+        ) return;
+
         let a = err => this.setState(() => ({
             loginFailed: true
         }), () => console.error(err));
@@ -278,6 +283,11 @@ class App extends Component {
     }
 
     registerUser = ({ login, password }) => {
+        if(
+            !login.replace(/\s|\n/g, "").length ||
+            !password.replace(/\s|\n/g, "").length
+        ) return;
+        
         let a = err => this.setState(() => ({
             registerFailed: true
         }), () => console.error(err));
