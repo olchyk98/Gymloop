@@ -33,14 +33,13 @@ function generateNoise(l = 256) {
 	return a;
 }
 
-function getDayDate() { // WARNING: Check freq - use PUSH instead of ADDTOSET
-    // Thanks: https://stackoverflow.com/questions/2013255/how-to-get-year-month-day-from-a-date-object
+function getDayDate() {
     const a = new Date,
           b = a.getUTCMonth() + 1;
           c = a.getUTCDate();
           d = a.getUTCFullYear();
 
-    newdate = `${ d }/${ b }/${ c }`; // 2019/04/21
+    return `${ d }/${ b }/${ c }`; // 2019/04/21
 }
 
 const str = a => a.toString();
@@ -62,9 +61,11 @@ const UserType = new GraphQLObjectType({
         authTokens: { type: new GraphQLList(GraphQLString) },
         getMeals: {
             type: new GraphQLList(MealType),
-            // TODO: Day arg
-            async resolve({ id }) {
-                const time = +new Date;
+            args: {
+                time: { type: GraphQLString }
+            },
+            async resolve({ id }, { time }) {
+                time = +time || +new Date;
 
                 return await Meal.find({
                     creatorID: str(id),
@@ -374,9 +375,11 @@ const RootMutation = new GraphQLObjectType({
                     )
                 } 
             },
-            resolve(_, { calories, dishes }, { req }) {
+            async resolve(_, { calories, dishes }, { req }) {
                 if(!req.session.authToken || !req.session.id)
                     throw new AuthenticationError("Not authenticated");
+
+                if(calories < 0) return null;
 
                 // Generate name
                 let a = ""; // WARNING: Should be empty|false|null here.
@@ -425,8 +428,32 @@ const RootMutation = new GraphQLObjectType({
                     name: a
                 })).save();
 
+                // Record user activity
+                await User.findByIdAndUpdate(req.session.id, {
+                    $push: {
+                        appActivity: getDayDate()
+                    }
+                });
+
                 // Return item
                 return b;
+            }
+        },
+        deleteMeal: {
+            type: GraphQLBoolean,
+            args: {
+                targetID: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            async resolve(_, { targetID }, { req }) {
+                if(!req.session.authToken || !req.session.id)
+                    throw new AuthenticationError("Not authenticated");
+
+                await Meal.findOneAndDelete({
+                    _id: targetID,
+                    creatorID: str(req.session.id)
+                });
+
+                return true;
             }
         }
     }

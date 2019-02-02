@@ -15,7 +15,7 @@ export default function(state = {}, { type, payload }) {
             //         action: Function!
             //     }
             // ]|
-
+            
             if(!payload) { // close modal
                 a.globalError = null;
                 break;

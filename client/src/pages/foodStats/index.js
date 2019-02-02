@@ -42,7 +42,7 @@ class Header extends Component {
 
             a.push({
                 time: b - 86400000 * ma,
-                active: ma === 0,
+                isToday: ma === 0,
                 title: `${ d.getDate() }${[
                     'jan',
                     'feb',
@@ -112,8 +112,13 @@ class Header extends Component {
                 <div className="rn-foodstats-header-explorer">
                     <div className={ (this.props.workOS !== "MAC") ? "" : "noscrbar" } ref={ ref => this.timeMachineRef = ref }>
                         {
-                            this.state.timeMachine.map(({ title, active }, index) => (
-                               <button className={ `definp${ (!active) ? "" : " active" }` } key={ index }>{ title }</button> 
+                            this.state.timeMachine.map(({ title, time, isToday }, index) => (
+                               <button
+                                className={ `definp${ (this.props.currentListDay === time || (this.props.currentListDay === null && isToday)) ? " active" : "" }` }
+                                key={ index }
+                                onClick={ () => this.props.onChooseTime(time) }>
+                                    { title }
+                                </button> 
                             ))
                         }
                     </div>
@@ -134,18 +139,27 @@ class MealsListItem extends Component {
         return(
             <div className="rn-foodstats-meallist-item_container">
                 <div className="rn-foodstats-meallist-item">
-                    <span className="rn-foodstats-meallist-item-title">{ this.props.name }</span>
-                    <div className="rn-foodstats-meallist-item-dishes">
-                        {
-                            this.props.dishes.map((session, index) => (
-                                <span key={ index }>{ session }</span>
-                            ))
-                        }
-                    </div>
                     <div className="rn-foodstats-meallist-item-info">
-                        <span>{ this.convertTime(this.props.time) } AM</span>
-                        <span>•</span>
-                        <span>{ this.props.calories } calories</span>
+                        <span className="rn-foodstats-meallist-item-title">{ this.props.name }</span>
+                        <div className="rn-foodstats-meallist-item-dishes">
+                            {
+                                this.props.dishes.map((session, index) => (
+                                    <span key={ index }>{ session }</span>
+                                ))
+                            }
+                        </div>
+                        <div className="rn-foodstats-meallist-item-infomat">
+                            <span>{ this.convertTime(this.props.time) } AM</span>
+                            <span>•</span>
+                            <span>{ this.props.calories } calories</span>
+                        </div>
+                    </div>
+                    <div className="rn-foodstats-meallist-item-controls">
+                        <button
+                            className="rn-foodstats-meallist-controls-item definp"
+                            onClick={ this.props.onDelete }>
+                            <i className="fas fa-trash" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -162,17 +176,23 @@ class MealsList extends Component {
                         <LoadIcon />
                     )
                 }
-                {
-                    this.props.list.map(({ id, name, dishes, time, calories }) => (
-                        <MealsListItem
-                            key={ id }
-                            name={ name }
-                            dishes={ dishes }
-                            time={ time }
-                            calories={ calories }
-                        />
-                    ))
-                }
+                <FlipMove
+                    className="rn-foodstats-meallist-mat"
+                    enterAnimation="elevator"
+                    leaveAnimation="elevator">
+                    {
+                        this.props.list.map(({ id, name, dishes, time, calories }) => (
+                            <MealsListItem
+                                key={ id }
+                                name={ name }
+                                dishes={ dishes }
+                                time={ time }
+                                calories={ calories }
+                                onDelete={ () => this.props.onDeleteMeal(id) }
+                            />
+                        ))
+                    }
+                </FlipMove>
             </section>
         );
     }
@@ -373,7 +393,8 @@ class Hero extends Component {
             recorder: false,
             caloriesData: null,
             mealToday: [],
-            addingMeal: false
+            addingMeal: false,
+            currentListDay: null
         }
     }
 
@@ -382,17 +403,23 @@ class Hero extends Component {
         this.loadData();
     }
 
-    loadData = () => {
+    loadData = time => {
         const castError = () => this.props.castAlert({ text: "Something went wrong" });
 
+        if(time) {
+            this.setState(() => ({
+                currentListDay: time
+            }));
+        }
+        
         client.query({
             query: gql`
-                query {
+                query($time: String) {
                     user {
                         id,
                         caloriesPerDay,
                         caloriesToday,
-                        getMeals {
+                        getMeals(time: $time) {
                             id,
                             dishes,
                             name,
@@ -401,7 +428,10 @@ class Hero extends Component {
                         }
                     }
                 }
-            `
+            `,
+            variables: {
+                time: (time) ? time.toString() : "0"
+            }
         }).then(({ data: { user: a } }) => {
             if(!a) return castError();
 
@@ -455,21 +485,56 @@ class Hero extends Component {
         }).then(({ data: { recordMeal: a } }) => {
             if(!a) return castError();
 
-            this.setState(({ mealToday, caloriesData }) => ({
-                mealToday: [
-                    a,
-                    ...mealToday
-                ],
-                addingMeal: false,
-                caloriesData: {
-                    ...caloriesData,
-                    currCalories: caloriesData.currCalories + a.calories
-                }
-            }))
+            this.setState(({ mealToday, caloriesData }) => {
+                let calories = caloriesData.currCalories + a.calories;
+                if(calories > caloriesData.maxCalories)
+                    calories = caloriesData.maxCalories;
+
+                return ({
+                    mealToday: [
+                        a,
+                        ...mealToday
+                    ],
+                    addingMeal: false,
+                    caloriesData: {
+                        ...caloriesData,
+                        currCalories: calories
+                    }
+                });
+            })
         }).catch((e) => {
             console.error(e);
             castError();
         })
+    }
+
+    deleteMeal = id => {
+        const castError = () => this.props.castAlert({
+            text: "An error occured"
+        });
+
+        const mealToday = this.state.mealToday;
+        mealToday.splice(mealToday.findIndex(io => io.id === id), 1);
+
+        this.setState(() => ({
+            mealToday: mealToday
+        }));
+
+        client.mutate({
+            mutation: gql`
+                mutation($targetID: ID!) {
+                    deleteMeal(targetID: $targetID)
+                }
+            `,
+            variables: {
+                targetID: id
+            }
+        }).then(({ data: { deleteMeal: a } }) => {
+            if(!a) return castError();
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
     }
 
     render() {
@@ -479,10 +544,13 @@ class Hero extends Component {
                     workOS={ this.props.workOS }
                     caloriesData={ this.state.caloriesData }
                     onRecord={ () => this.setState({ recorder: true }) }
+                    onChooseTime={ this.loadData }
+                    currentListDay={ this.state.currentListDay }
                 />
                 <MealsList
                     list={ this.state.mealToday }
                     addingItem={ this.state.addingMeal }
+                    onDeleteMeal={ this.deleteMeal }
                 />
                 <Recorder
                     active={ this.state.recorder }

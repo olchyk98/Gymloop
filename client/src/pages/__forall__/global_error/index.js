@@ -18,6 +18,7 @@ class Hero extends Component {
     componentDidUpdate(a) {
         if(
             (!a.banner && this.props.banner) ||
+            (a.banner && !this.props.banner) ||
             (
                 this.props.banner &&
                 a.banner.text !== this.props.banner.text

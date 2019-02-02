@@ -63,13 +63,15 @@
     border-radius:var(--borderr);
     width:100%;
     background:transparent;
-    background:linear-gradient(90deg, orange, yellow);
+    background:linear-gradient(90deg, yellow, orange);
     transition:.75s;
 }
 
 .rn-foodstats-header-progress-particle {
     --size:5px;
     --delay:0s;
+    --amdropmenus:1;
+    --colorbg:transparent;
 
     height:var(--size);
     width:var(--size);
@@ -78,50 +80,61 @@
     top:0;
     left:0;
     border-radius:50%;
-    background:rgba(0, 0, 0, .25);
-    filter:drop-shadow(0px 0px 5px rgba(255, 0, 0, 1));
-    animation:foostats-header-progress-particle-movement-inf-am 1s var(--delay) infinite ease-in-out alternate;
+    background:var(--colorbg);
+    filter:drop-shadow(0px 0px 5px var(--colorbg));
+    animation:foostats-header-progress-particle-movement-inf-am 1s var(--delay) ease-in-out;
+    animation-fill-mode:forwards;
 }
 
-.rn-foodstats-header-progress-particle.a {
+.rn-foodstats-header-progress-particle.a { /* l1 */
     left:5px;
+    --amdropmenus:-1;
+    --colorbg:yellow;
 }
 
-.rn-foodstats-header-progress-particle.b {
+.rn-foodstats-header-progress-particle.b { /* l2 */
     left:-5px;
     --delay:.25s;
+    --amdropmenus:-1;
+    --colorbg:yellow;
 }
 
-.rn-foodstats-header-progress-particle.c {
-    left:100%;
-    --delay:.5s;
-}
-
-.rn-foodstats-header-progress-particle.d {
-    left:calc(100% - 5px);
-    --delay:.75s;
-}
-
-.rn-foodstats-header-progress-particle.e {
+.rn-foodstats-header-progress-particle.e { /* l3 */
     left:15px;
     --delay:.9s;
+    --amdropmenus:-1;
+    --colorbg:yellow;
 }
 
-.rn-foodstats-header-progress-particle.f {
-    left:calc(100% - 15px);
-    --delay:1.1s;
+.rn-foodstats-header-progress-particle.c { /* r1 */
+    left:calc(100% - 2.5px);
+    --colorbg:orange;
+}
+
+.rn-foodstats-header-progress-particle.d { /* r2 */
+    left:calc(100% + 7.5px);
+    --delay:.1s;
+    --colorbg:orange;
+}
+
+.rn-foodstats-header-progress-particle.f { /* r3 */
+    left:calc(100% + 15px);
+    --delay:.3s;
+    --colorbg:orange;
 }
 
 @keyframes foostats-header-progress-particle-movement-inf-am {
     0% {
         transform:translate(0, 0);
+        opacity:0;
     }
     50% {
-        transform:translate(5px, 10px);
+        transform:translate(calc(5px * var(--amdropmenus)), -10px);
+        opacity:1;
     }
-    
     100% {
-        transform:translate(-5px, -10px);
+        transform:translate(calc(10px * var(--amdropmenus)), 10px);
+        opacity:0;
     }
 }
 
@@ -215,11 +228,16 @@
 }
 
 .rn-foodstats-meallist {
+    height:auto;
+    width:100%;
+    position:relative;
+}
+
+.rn-foodstats-meallist-mat {
+    width:100%;
     display:flex;
     flex-direction:column;
     align-items:center;
-    height:auto;
-    width:100%;
 }
 
 .rn-foodstats-meallist-item_container {
@@ -240,8 +258,9 @@
     border-radius:7.5px;
     background:#F7F8FC;
     display:flex;
-    justify-content:center;
-    flex-direction:column;
+    position:relative;
+    align-items:stretch;
+    justify-content:space-between;
 }
 
 .rn-foodstats-meallist-item > * {
@@ -274,11 +293,14 @@
     font-weight:400;
     font-size:.9em;
     border-radius:2.5px;
+    margin-right:7.5px;
 }
 
 .rn-foodstats-meallist-item-info {
     display:flex;
-    align-items:center;
+    align-items:flex-start;
+    justify-content:center;
+    flex-direction:column;
     color:rgba(0, 0, 0, .4);
     font-size:.95em;
     font-family:"Quicksand";
@@ -287,23 +309,54 @@
 .rn-foodstats-meallist-item-info > * {
     --margin:2.5px;
 
+    margin-top:var(--margin);
+    margin-bottom:var(--margin);
+}
+
+.rn-foodstats-meallist-item-infomat {
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.rn-foodstats-meallist-item-infomat > * {
+    --margin:2.5px;
+
     margin-left:var(--margin);
     margin-right:var(--margin);
 }
 
-.rn-foodstats-meallist-item-info > :first-child {
+.rn-foodstats-meallist-item-infomat > :first-child {
     margin-left:0;
 }
 
-.rn-foodstats-meallist-item-info > :last-child {
+.rn-foodstats-meallist-item-infomat > :last-child {
     margin-right:0;
+}
+
+.rn-foodstats-meallist-item-controls {
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.rn-foodstats-meallist-controls-item {
+    font-size:1.5em;
+    color:rgba(0, 0, 0, .5);
+    cursor:pointer;
+    transition:.25s;
+}
+
+.rn-foodstats-meallist-controls-item:hover {
+    color:rgba(0, 0, 0, .75);
 }
 
 .rn-foodstats-recorderbg {
     --trans:.25s;
     
-    height:100vh;
-    width:100vw;
+    height:100%;
+    width:100%;
     background:rgba(0, 0, 0, .25);
     z-index:399;
     position:fixed;
@@ -317,8 +370,8 @@
 
     min-height:calc(500px - var(--padding) * 2);
     width:calc(400px - var(--padding) * 2);
-    max-height:calc(100vh - var(--padding));
-    max-width:calc(100vw - var(--padding));
+    max-height:calc(100% - var(--padding));
+    max-width:calc(100% - var(--padding) - 15px);
     overflow:scroll;
     background:white;
     position:fixed;
@@ -353,7 +406,7 @@
 }
 
 .rn-foodstats-recorderbg.active ~ .rn-foodstats-recorder {
-    transform:translate(-50%, -50%);
+    transform:translate(-50%, calc(-50% - var(--dockheight) / 2));
 }
 
 .rn-foodstats-recorder-close {
