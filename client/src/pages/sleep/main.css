@@ -1,0 +1,228 @@
+.rn-sleep-add {
+    height:100%;
+    width:100%;
+    position:relative;
+    z-index:2;
+    background:#F8F9F9;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    overflow:scroll;
+}
+
+.rn-sleep.dark .rn-sleep-add {
+    background:#2C3548;
+}
+
+.rn-sleep-add > * {
+    flex-shrink:0;
+}
+
+.rn-sleep-add,
+.rn-sleep-add * {
+    outline:0;
+}
+
+.rn-sleep-add-icon {
+    width:150px;
+    max-width:100%;
+    margin-bottom:25px;
+}
+
+.rn-sleep-add-title {
+    margin-top:15px;
+    margin-bottom:5px;
+    font-size:1.55em;
+    font-family:"Exo";
+    font-weight:400;
+}
+
+.rn-sleep.dark .rn-sleep-add-title {
+    color:white;
+}
+
+.rn-sleep-add-optiondesc {
+    font-size:.85em;
+    color:rgba(0, 0, 0, .85);
+    font-family:"Quicksand";
+    font-display:400;
+    margin-top:10px;
+}
+
+.rn-sleep.dark .rn-sleep-add-optiondesc {
+    color:rgba(255, 255, 255, .85);
+}
+
+.rn-sleep-add-timer {
+    height:45px;
+    width:175px;
+    border-radius:45px;
+    border:1px solid rgba(0, 0, 0, .075);
+    background:rgba(0, 0, 0, .01);
+    margin-top:10px;
+    margin-bottom:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+.rn-sleep.dark .rn-sleep-add-timer {
+    background:rgba(255, 255, 255, .05);
+}
+
+.rn-sleep-add-timer {
+    --margin:5px;
+
+    margin-left:var(--margin);
+    margin-right:var(--margin);
+}
+
+.rn-sleep-add-timer-number {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+    position:relative;
+    width:32.5px;
+}
+
+.rn-sleep.dark .rn-sleep-add-timer {
+    color:rgba(255, 255, 255, .75);
+}
+
+.rn-sleep-add-timer-number-arrow {
+    --gap:-30px;
+
+    position:absolute;
+    font-size:1.75em;
+    color:red;
+    filter:drop-shadow(0px 0px 1px rgba(0, 0, 0, .5));
+    cursor:pointer;
+    opacity:0;
+    transition:.45s;
+}
+
+.rn-sleep.dark .rn-sleep-add-timer-number-arrow {
+    color:white;
+}
+
+.rn-sleep-add-timer:hover .rn-sleep-add-timer-number-arrow {
+    opacity:1;
+}
+
+.rn-sleep-add-timer-number-arrow.up {
+    top:var(--gap);
+}
+
+.rn-sleep-add-timer-number-arrow.down {
+    bottom:var(--gap);
+}
+
+.rn-sleep-add-timer-number-mat {
+    font-size:2em;
+    font-family:"Lato";
+}
+
+.rn-sleep-add-sleeprate {
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:7.5px;
+    position:relative;
+}
+
+.rn-sleep-add-sleeprate-item {
+    --size:40px;
+    --offcol:gray;
+
+    height:40px;
+    width:40px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.rn-sleep-add-sleeprate-item * {
+    transition:.25s;
+}
+
+.rn-sleep-add-sleeprate-item > .icon {
+    color:var(--offcol);
+    font-size:1em;
+    opacity:0;
+    height:auto;
+    width:auto;
+    position:relative;
+}
+
+.rn-sleep-add-sleeprate-item.active > .icon {
+    font-size:1.5em;
+    opacity:1;
+    color:gold;
+}
+
+.rn-sleep-add-sleeprate-item > .empty {
+    --size:15px;
+
+    height:var(--size);
+    width:var(--size);
+    border-radius:50%;
+    cursor:pointer;
+    background:gray;
+    position:absolute;
+    top:50%;
+    left:50%;
+    margin-right:50%;
+    transform:translate(-50%, -50%);
+}
+
+.rn-sleep-add-sleeprate-item:hover > .empty {
+    background:gold;
+}
+
+.rn-sleep-add-sleeprate-item.active > .empty {
+    opacity:0;
+}
+
+.rn-sleep-add-submit {
+    margin-top:25px;
+    cursor:pointer;
+    height:40px;
+    width:195px;
+    border-radius:45px;
+    background:#52CBF0;
+    text-transform:uppercase;
+    color:white;
+    font-weight:200;
+    font-family:"Quicksand";
+    transition:.25s;
+}
+
+.rn-sleep-add-submit:hover {
+    background:#61d1f3;
+}
+
+.rn-sleep.dark .rn-sleep-add-submit {
+    background:#25aad3;
+}
+
+.rn-sleep.dark .rn-sleep-add-submit:hover {
+    background:#3fbbe0;
+}
+
+.rn-sleep-add-submit:active {
+    transition:.1s;
+    transform:scale(.9);
+}
+
+.rn-sleep-add-submit > * {
+    --margin:5px;
+
+    margin-left:var(--margin);
+    margin-right:var(--margin);
+}
