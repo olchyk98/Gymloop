@@ -6,6 +6,7 @@ import { gql } from 'apollo-boost';
 import { AreaChart } from 'react-easy-chart';
 
 import client from '../../apollo';
+import links from '../../links';
 import placeholderGIF from '../__forall__/placeholder.gif';
 
 const Placeholder = ({ _style }) => (
@@ -278,24 +279,30 @@ class Hero extends Component {
                     {
                         [
                             {
-                                label: "FOOD",
                                 icon: <i className="fas fa-utensils" />,
                                 title: "Record meal",
-                                routeButton: "Record"
+                                routeButton: "Record",
+                                action: () => {
+                                    this.props.history.push(`${ links["FOOD_STATS_PAGE"].absolute }/record`);
+                                }
                             },
                             {
-                                label: "TRAINING",
                                 icon: <i className="fas fa-dumbbell" />,
                                 title: "Start training",
-                                routeButton: "Start"
+                                routeButton: "Start",
+                                action: () => {
+                                    // this.props.history.push(links["HOME_PAGE"].absolute);
+                                }
                             },
                             {
-                                label: "SLEEP",
                                 icon: <i className="fas fa-socks" />,
                                 title: "Record sleep time",
-                                routeButton: "Record"
+                                routeButton: "Record",
+                                action: () => {
+                                    // this.props.history.push(links["HOME_PAGE"].absolute);
+                                }
                             }
-                        ].map(({ label, icon, title, routeButton }, index) => (
+                        ].map(({ icon, title, routeButton, action }, index) => (
                             <div
                                 key={ index }
                                 className="rn-home-block rn-home-navigation">
@@ -303,7 +310,7 @@ class Hero extends Component {
                                     { icon }
                                 </div>
                                 <h3 className="rn-home-navigation-title">{ title }</h3>
-                                <button className="rn-home-navigation-move definp">{ routeButton }</button>
+                                <button className="rn-home-navigation-move definp" onClick={ action }>{ routeButton }</button>
                             </div>
                         ))
                     }

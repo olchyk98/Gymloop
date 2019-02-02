@@ -55,6 +55,11 @@ class Hero extends Component {
                             icon: <i className="fas fa-drumstick-bite" />,
                             mark: "FOOD_STATS_PAGE",
                             name: "Food"
+                        },
+                        {
+                            icon: <i className="fas fa-bed"></i>,
+                            mark: "SLEEP_PAGE",
+                            name: "Sleep"
                         }
                     ].map(({ icon, mark, name }, index) => (
                         <Link

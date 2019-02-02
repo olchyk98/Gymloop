@@ -4,8 +4,12 @@ const links = {
         absolute: '/'
     },
     "FOOD_STATS_PAGE": {
-        route: '/food',
+        route: '/food/:hook?',
         absolute: '/food'
+    },
+    "SLEEP_PAGE": {
+        route: '/sleep',
+        absolute: '/sleep'
     }
 }
 

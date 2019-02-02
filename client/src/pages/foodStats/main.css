@@ -368,7 +368,7 @@
 .rn-foodstats-recorder {
     --padding:25px;
 
-    min-height:calc(500px - var(--padding) * 2);
+    min-height:calc(400px - var(--padding) * 2);
     width:calc(400px - var(--padding) * 2);
     max-height:calc(100% - var(--padding));
     max-width:calc(100% - var(--padding) - 15px);
@@ -438,10 +438,11 @@
 
 .rn-foodstats-recorder-foodtags {
     --padding:15px;
+    --widthw:190px;
 
     padding:var(--padding);
     min-height:calc(30px - var(--padding) * 2);
-    width:calc(100% - var(--padding) * 2);
+    min-width:calc(var(--widthw) - var(--padding) * 2);
     background:rgba(0, 0, 0, .01);
     border-radius:5px;
     display:flex;
@@ -480,12 +481,15 @@
 }
 
 .rn-foodstats-recorder-input {
+    --padding:10px;
+
     border-radius:3px;
-    padding:10px;
+    padding:var(--padding);
     border:2px solid rgba(0, 0, 0, .1);
     font-family:"Lato";
     margin-top:15px;
     transition:.25s;
+    width:calc(var(--widthw) - var(--padding) * 2);
     max-width:100%;
 }
 

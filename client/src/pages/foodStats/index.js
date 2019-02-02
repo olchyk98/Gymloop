@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import FlipMove from 'react-flip-move';
 
 import client from '../../apollo';
+import links from '../../links';
 
 import LoadIcon from '../__forall__/load.icon';
 
@@ -27,7 +28,7 @@ class Header extends Component {
 
     componentDidUpdate() {
         if(!this.timeMachineRefScrolled && this.state.timeMachine.length) {
-            this.timeMachineRefScrolled = false;
+            this.timeMachineRefScrolled = true;
             this.timeMachineRef.scrollLeft = this.timeMachineRef.scrollWidth;
         }
     }
@@ -41,6 +42,7 @@ class Header extends Component {
                   d = new Date(c);
 
             a.push({
+                index: ma,
                 time: b - 86400000 * ma,
                 isToday: ma === 0,
                 title: `${ d.getDate() }${[
@@ -112,7 +114,7 @@ class Header extends Component {
                 <div className="rn-foodstats-header-explorer">
                     <div className={ (this.props.workOS !== "MAC") ? "" : "noscrbar" } ref={ ref => this.timeMachineRef = ref }>
                         {
-                            this.state.timeMachine.map(({ title, time, isToday }, index) => (
+                            this.state.timeMachine.map(({ index, title, time, isToday }) => (
                                <button
                                 className={ `definp${ (this.props.currentListDay === time || (this.props.currentListDay === null && isToday)) ? " active" : "" }` }
                                 key={ index }
@@ -217,14 +219,18 @@ class RecorderNameInput extends Component {
         this.state = {
             value: ""
         }
+
+        this.matRef = React.createRef();
     }
 
     submit = () => {
+        this.matRef.value = "";
+        this.setState(() => ({
+            value: ""
+        }));
+
         if(this.state.value.replace(/\s|\n/g, "").length) {
             this.props._onSubmit(this.state.value);
-            this.setState(() => ({
-                value: ""
-            }));
         }
     }
 
@@ -234,13 +240,15 @@ class RecorderNameInput extends Component {
                 className="rn-foodstats-recorder-input definp"
                 placeholder={ this.props._placeholder }
                 type="text"
-                onKeyDown={({ keyCode }) => {
-                    if([13, 188].includes(keyCode))
-                        this.submit()
+                onKeyDown={(e) => {
+                    if([13, 188].includes(e.keyCode)) {
+                        e.preventDefault();
+                        this.submit();
+                    }
                 }}
                 onChange={ ({ target: { value } }) => this.setState({ value }) }
                 onBlur={ this.submit }
-                value={ this.state.value }
+                ref={ ref => this.matRef = ref }
             />
         );
     }
@@ -257,6 +265,15 @@ class RecorderCaloriesSlider extends Component {
 
         this.sliderRef = React.createRef();
         this.cursorRef = React.createRef();
+    }
+
+    componentDidUpdate(a) {
+        if(a.calories && !this.props.calories) {
+            this.setState(() => ({
+                sliding: false,
+                clientX: 0
+            }));
+        }
     }
 
     render() {
@@ -321,15 +338,30 @@ class Recorder extends Component {
         this.props.onRecord(food, calories);
     }
 
+    clear = () => {
+        this.setState(() => ({
+            foodID: 0,
+            food: [],
+            calories: 0
+        }));
+    }
+
+    close = () => {
+        this.clear();
+        this.props.onClose();
+
+        window.history.pushState(null, null, links["FOOD_STATS_PAGE"].absolute);
+    }
+
     render() {
         return(
             <Fragment>
                 <div
                     className={ `rn-foodstats-recorderbg${ (!this.props.active) ? "" : " active" }` }
-                    onClick={ this.props.onClose }
+                    onClick={ this.close }
                 />
                 <div className="rn-foodstats-recorder">
-                    <button className="rn-foodstats-recorder-close definp" onClick={ this.props.onClose }>
+                    <button className="rn-foodstats-recorder-close definp" onClick={ this.close }>
                         <i className="fas fa-times" />
                     </button>
                     <h1 className="rn-foodstats-recorder-name">New meal</h1>
@@ -401,6 +433,16 @@ class Hero extends Component {
     componentDidMount() {
         this.props.notifyLoaded();
         this.loadData();
+
+        { // Get hook
+            const a = this.props.match.params.hook;
+            switch(a) {
+                case 'record':
+                    this.setState({ recorder: true });
+                break;
+                default:break;
+            }
+        }
     }
 
     loadData = time => {
