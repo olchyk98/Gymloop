@@ -1,0 +1,127 @@
+.rn-settings {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+.rn-settings-title {
+    font-family:"Quicksand";
+    font-weight:400;
+    font-size:2.5em;
+    background:linear-gradient(gray, black);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color: transparent;
+}
+
+.rn-settings-insert {
+    display:flex;
+    flex-direction:column;
+    width:auto;
+    align-items:flex-start;
+}
+
+.rn-settings-insert-title {
+    font-family:"Lato";
+    font-weight:500;
+    font-size:.75em;
+    margin-bottom:15px;
+    text-transform:uppercase;
+}
+
+.rn-settings-txtfield {
+    --padding:7.5px;
+
+    height:40px;
+    width:175px;
+    border-radius:2.5px;
+    border:2px solid rgba(0, 0, 0, .25);
+    padding-left:var(--padding);
+    padding-right:var(--padding);
+}
+
+/* IDEA: Focus blue whale */
+.rn-settings-cslider {
+    --height:2px;
+
+    height:var(--height);
+    border-radius:var(--height);
+    background:rgba(0, 0, 0, .1);
+    width:145px;
+    position:relative;
+    transition:.25s;
+}
+
+.rn-settings-cslider,
+.rn-settings-cslider * {
+    outline:0;
+}
+
+.rn-settings-cslider:before {
+    content:'';
+    position:absolute;
+    top:0;
+    /* left:50%; */
+    /* transform:translateX(-50%); */
+    left:0;
+    width:0%;
+    height:100%;
+    background:rebeccapurple;
+    border-radius:var(--height);
+    transition:all .15s ease-in-out;
+}
+
+.rn-settings-cslider:focus:before {
+    width:100%;
+}
+
+.rn-settings-cslider > div {
+    --size:15px;
+    --col:#2993c4;
+
+    background:var(--col);
+    height:var(--size);
+    width:var(--size);
+    box-shadow:0px 0px 5px -1px rgba(0, 0, 0, .25);
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    position:relative;
+    left:-1px;
+    border-radius:50%;
+}
+
+.rn-settings-cslider > div > span {
+    --paddinglr:5px;
+    --paddingud:2.5px;
+    --marginpd:-7.5px;
+
+    padding:var(--paddingud) var(--paddinglr) var(--paddingud) var(--paddinglr);
+    left:50%;
+    margin-right:50%;
+    transform:translate(-50%, 100%);
+    bottom:var(--marginpd);
+    background:var(--col);
+    border-radius:2.5px;
+    font-weight:300;
+    position:absolute;
+    font-family:"Quicksand";
+    font-size:.8em;
+    color:rgba(255, 255, 255, .95);
+}
+
+.rn-settings-cslider > div > span:before {
+    --size:5px;
+    
+    content:'';
+    position:absolute;
+    top:calc(var(--size) / 2 * -1 + 1.5px);
+    left:50%;
+    margin-right:50%;
+    background:var(--col);
+    transform:translateX(-50%) rotate(45deg);
+    height:var(--size);
+    width:var(--size);
+}

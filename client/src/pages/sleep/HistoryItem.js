@@ -51,7 +51,7 @@ class HistoryItem extends Component {
                 <div className="rn-sleep-history-list-item-mood">
                     <div><i className={ this.getSmile() } /></div>
                 </div>
-                <button className="rn-sleep-history-list-item-delete definp">
+                <button className="rn-sleep-history-list-item-delete definp" onClick={ this.props.onDelete }>
                     <i className="fas fa-trash" />
                 </button>
             </div>

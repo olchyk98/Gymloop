@@ -489,6 +489,23 @@ const RootMutation = new GraphQLObjectType({
 
                 return sleep;
             }
+        },
+        deleteSleep: {
+            type: GraphQLBoolean,
+            args: {
+                targetID: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            async resolve(_, { targetID }, { req }) {
+                if(!req.session.id || !req.session.authToken)
+                    throw new AuthenticationError("Not authenticated");
+
+                await Sleep.findOneAndDelete({
+                    _id: targetID,
+                    creatorID: str(req.session.id)
+                });
+
+                return true;
+            }
         }
     }
 });

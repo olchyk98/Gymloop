@@ -47,6 +47,11 @@ class Hero extends Component {
                 {
                     [
                         {
+                            icon: <i className="fas fa-bed"></i>,
+                            mark: "SLEEP_PAGE",
+                            name: "Sleep"
+                        },
+                        {
                             icon: <i className="fas fa-home" />,
                             mark: "HOME_PAGE",
                             name: "Home"
@@ -57,9 +62,9 @@ class Hero extends Component {
                             name: "Food"
                         },
                         {
-                            icon: <i className="fas fa-bed"></i>,
-                            mark: "SLEEP_PAGE",
-                            name: "Sleep"
+                            icon: <i className="fas fa-cogs" />,
+                            mark: "SETTINGS_PAGE",
+                            name: "Settings"
                         }
                     ].map(({ icon, mark, name }, index) => (
                         <Link

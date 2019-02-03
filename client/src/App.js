@@ -5,6 +5,7 @@ import Home from './pages/home';
 import Login from './pages/login';
 import FoodStats from './pages/foodStats';
 import Sleep from './pages/sleep';
+import Settings from './pages/settingsp';
 
 // Stuff
 import { cookieControl } from './utils';
@@ -81,6 +82,13 @@ class App extends Component {
 									path={ links["SLEEP_PAGE"].route }
 									condition={ this.cookieID }
 									component={ Sleep }
+									redirect={ Login }
+									exact
+              />
+               <NeedleRoute
+									path={ links["SETTINGS_PAGE"].route }
+									condition={ this.cookieID }
+									component={ Settings }
 									redirect={ Login }
 									exact
               />

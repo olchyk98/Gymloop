@@ -10,6 +10,10 @@ const links = {
     "SLEEP_PAGE": {
         route: '/sleep',
         absolute: '/sleep'
+    },
+    "SETTINGS_PAGE": {
+        route: '/settings',
+        absolute: '/settings'
     }
 }
 

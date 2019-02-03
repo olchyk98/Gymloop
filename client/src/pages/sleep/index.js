@@ -9,6 +9,7 @@ import client from '../../apollo';
 import moonIcon from './images/moon.png';
 import LoadIcon from '../__forall__/load.icon';
 import HistoryItem from './HistoryItem';
+import FlipMove from 'react-flip-move';
 
 class TimerNumber extends Component {
     render() {
@@ -158,6 +159,13 @@ class Add extends Component {
         const { startTime, endTime, rate } = this.state,
               a = new Date();
 
+        if(
+            startTime.hours === "00" &&
+            startTime.minutes === "00" &&
+            endTime.hours === "00" &&
+            endTime.minutes === "00"
+        ) return;
+
         let b = 0,
             c = 0;
 
@@ -244,7 +252,10 @@ class History extends Component {
                 <button className="definp rn-sleep-history-times" onClick={ this.props.onClose }>
                     <i className="fas fa-plus" />
                 </button>
-                <div className="rn-sleep-history-list">
+                <FlipMove
+                    className="rn-sleep-history-list"
+                    enterAnimation="elevator"
+                    leaveAnimation="elevator">
                     {
                         (this.props.history) ? (
                             this.props.history.map(({ id, time, rating, sleepMinutes }) => (
@@ -253,13 +264,14 @@ class History extends Component {
                                     time={ time }
                                     rating={ rating }
                                     sleepMinutes={ sleepMinutes }
+                                    onDelete={ () => this.props.onDeleteItem(id) }
                                 />
                             ))
                         ) : ( // even on err
                             <LoadIcon />
                         )
                     }
-                </div>
+                </FlipMove>
             </div>
         );
     }
@@ -373,6 +385,38 @@ class Hero extends Component {
         });
     }
 
+    deleteHistoryItem = id => {
+        if(!this.state.sleepHistory) return;
+
+        {
+            const a = Array.from(this.state.sleepHistory);
+            a.splice(a.findIndex(io => io.id === id), 1);
+            this.setState(() => ({
+                sleepHistory: a
+            }));
+        }
+
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        client.mutate({
+            mutation: gql`
+                mutation($targetID: ID!) {
+                    deleteSleep(targetID: $targetID)
+                }
+            `,
+            variables: {
+                targetID: id
+            }
+        }).then(({ data: { deleteSleep: b } }) => {
+            if(!b) return castError();
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
+    }
+
     render() {
         return(
             <div className={ `rn rn_nav rn-sleep${ (this.state.lightTheme) ? "" : " dark" }` }>
@@ -389,6 +433,7 @@ class Hero extends Component {
                     active={ this.state.historyOpened }
                     onClose={ () => this.setState({ historyOpened: false }) }
                     history={ this.state.sleepHistory }
+                    onDeleteItem={ this.deleteHistoryItem }
                 />
                 {/* absolute bottom slide button >> div :: history (header: mid time, body: history) */}
                 <button
