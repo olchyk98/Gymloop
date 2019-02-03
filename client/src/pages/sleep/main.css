@@ -207,14 +207,6 @@
     background:#61d1f3;
 }
 
-.rn-sleep.dark .rn-sleep-add-submit {
-    background:#25aad3;
-}
-
-.rn-sleep.dark .rn-sleep-add-submit:hover {
-    background:#3fbbe0;
-}
-
 .rn-sleep-add-submit:active {
     transition:.1s;
     transform:scale(.9);
@@ -225,4 +217,43 @@
 
     margin-left:var(--margin);
     margin-right:var(--margin);
+}
+
+.rn-sleep-history_shortcut {
+    --brr:45px;
+
+    height:42.5px;
+    width:45px;
+    position:absolute;
+    bottom:0;
+    left:50%;
+    margin-right:50%;
+    border-radius:var(--brr) var(--brr) 0 0;
+    background:aqua;
+    z-index:3;
+    transform:translateX(-50%);
+    cursor:pointer;
+    color:white;
+    font-size:1.25em;
+    transition:.45s;
+}
+
+.rn-sleep-history_shortcut.hidden {
+    opacity:0;
+    transform:translateY(100%);
+}
+
+.rn-sleep-history_shortcut > svg {
+    position:relative;
+    bottom:-1.5px;
+}
+
+.rn-sleep.dark .rn-sleep-add-submit,
+.rn-sleep-history_shortcut {
+    background:#25aad3;
+}
+
+.rn-sleep.dark .rn-sleep-add-submit:hover,
+.rn-sleep-history_shortcut:hover {
+    background:#3fbbe0;
 }

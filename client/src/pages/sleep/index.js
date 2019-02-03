@@ -50,7 +50,8 @@ class Timer extends Component {
         ) val = 0;
 
         else if(field === 'h1' && val < 0) val = 2;
-        else if(field === 'h2' && val < 0) val = 9;
+        else if(field === 'h2' && val < 0 && this.state.h1 < 2) val = 9;
+        else if(field === 'h2' && val < 0 && this.state.h1 === 2) val = 3;
         else if(field === 'm1' && val < 0) val = 5;
         else if(field === 'm2' && val < 0) val = 9;
 
@@ -120,23 +121,15 @@ class SleepRateStar extends Component {
 }
 
 class SleepRate extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            sleepRate: 1
-        }
-    }
-
     render() {
         return(
             <div className="rn-sleep-add-sleeprate">
                 {
-                    Array(5).fill(null).map((session, index) => (
+                    Array(5).fill(null).map((_, index) => (
                         <SleepRateStar
                              key={ index }
-                             active={ this.state.sleepRate >= index + 1 }
-                             _onClick={ () => this.setState({ sleepRate: index + 1 }) }
+                             active={ this.props.sleepRate >= index + 1 }
+                             _onClick={ () => this.props._onSubmit(index + 1) }
                          />
                     ))
                 }
@@ -150,13 +143,15 @@ class Add extends Component {
         super(props);
 
         this.state = {
-            time: { hours: "00", minutes: "00" }
+            start: { hours: "00", minutes: "00" },
+            endTime: { hours: "00", minutes: "00" },
+            rate: 1
         }
     }
 
     render() {
         return(
-            <section className="rn-sleep-add">
+            <section className="rn-sleep-add" onScroll={ this.props._onScroll }>
                 {/* icon */}
                 <img className="rn-sleep-add-icon" alt="moon icon" src={ moonIcon } />
                 {/* title */}
@@ -167,7 +162,7 @@ class Add extends Component {
                 </span>
                 {/* start timer */}
                 <Timer
-                    _onSubmit={ time => this.setState({ time }) }
+                    _onSubmit={ startTime => this.setState({ startTime }) }
                 />
                 {/* end time small title */}
                 <span className="rn-sleep-add-optiondesc">
@@ -175,14 +170,17 @@ class Add extends Component {
                 </span>
                 {/* end timer */}
                 <Timer
-                    _onSubmit={ time => this.setState({ time }) }
+                    _onSubmit={ endTime => this.setState({ endTime }) }
                 />
                 {/* stars rating small title */}
                 <span className="rn-sleep-add-optiondesc">
                     Rate your sleep
                 </span>
                 {/* stars rating */}
-                <SleepRate />
+                <SleepRate
+                    sleepRate={ this.state.rate }
+                    _onSubmit={ rate => this.setState({ rate }) }
+                />
                 {/* submit button */}
                 <button className="rn-sleep-add-submit definp">
                     <span>Record</span>
@@ -193,12 +191,22 @@ class Add extends Component {
     }
 }
 
+class History extends Component {
+    render() {
+        return(
+            null
+        );
+    }
+}
+
 class Hero extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            lightTheme: true
+            lightTheme: true,
+            addScrolled: false,
+            historyOpened: false
         }
     }
     
@@ -217,8 +225,18 @@ class Hero extends Component {
     render() {
         return(
             <div className={ `rn rn_nav rn-sleep${ (this.state.lightTheme) ? "" : " dark" }` }>
-                <Add />
+                <Add
+                    _onScroll={({ target: { scrollTop } }) => {
+                        this.setState(() => ({
+                            addScrolled: scrollTop > 0
+                        }));
+                    }}
+                />
+                <History />
                 {/* absolute bottom slide button >> div :: history (header: mid time, body: history) */}
+                <button className={ `rn-sleep-history_shortcut definp${ (!this.state.addScrolled && !this.state.historyOpened) ? "" : " hidden" }` }>
+                    <i className="fas fa-history" />
+                </button>
             </div>
         );
     }
