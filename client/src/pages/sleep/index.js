@@ -2,8 +2,13 @@ import React, { Component } from 'react';
 import './main.css';
 
 import { connect } from 'react-redux';
+import { gql } from 'apollo-boost';
+
+import client from '../../apollo';
 
 import moonIcon from './images/moon.png';
+import LoadIcon from '../__forall__/load.icon';
+import HistoryItem from './HistoryItem';
 
 class TimerNumber extends Component {
     render() {
@@ -143,10 +148,35 @@ class Add extends Component {
         super(props);
 
         this.state = {
-            start: { hours: "00", minutes: "00" },
+            startTime: { hours: "00", minutes: "00" },
             endTime: { hours: "00", minutes: "00" },
             rate: 1
         }
+    }
+
+    submit = () => {
+        const { startTime, endTime, rate } = this.state,
+              a = new Date();
+
+        let b = 0,
+            c = 0;
+
+        b = (new Date(
+            a.getDate() + '.' +
+            (a.getMonth() + 1) + '.' +
+            a.getFullYear() + ' ' +
+            startTime.hours + ':' + startTime.minutes
+        )).toLocaleString();
+
+
+        c = (new Date(
+            a.getDate() + '.' +
+            (a.getMonth() + 1) + '.' +
+            a.getFullYear() + ' ' +
+            endTime.hours + ':' + endTime.minutes
+        )).toLocaleString();
+
+        this.props._onSubmit(b, c, rate);
     }
 
     render() {
@@ -155,7 +185,7 @@ class Add extends Component {
                 {/* icon */}
                 <img className="rn-sleep-add-icon" alt="moon icon" src={ moonIcon } />
                 {/* title */}
-                <h2 className="rn-sleep-add-title">Ok. Let's record your sleep</h2>
+                <h2 className="rn-sleep-add-title">Let's record your sleep</h2>
                 {/* start time small title */}
                 <span className="rn-sleep-add-optiondesc">
                     When did you go to bed?
@@ -182,33 +212,27 @@ class Add extends Component {
                     _onSubmit={ rate => this.setState({ rate }) }
                 />
                 {/* submit button */}
-                <button className="rn-sleep-add-submit definp">
-                    <span>Record</span>
-                    <span role="img" aria-label="Sleep">😴</span>
+                <button className="rn-sleep-add-submit definp" onClick={ this.submit } disabled={ this.props.recorded === false }>
+                    {
+                        (this.props.recorded === null) ? (
+                            <>
+                                <span>Record</span>
+                                <span role="img" aria-label="Bed">🛏</span>
+                            </>
+                        ) : (this.props.recorded === true) ? (
+                            <>
+                                <span>Recorded</span>
+                                <span role="img" aria-label="Sleep with a human">🛌</span>
+                            </>
+                        ) : ( // false : recording
+                            <>
+                                <span>Recording</span>
+                                <span role="img" aria-label="Sleep">😴</span>
+                            </>
+                        )
+                    }
                 </button>
             </section>
-        );
-    }
-}
-
-class HistoryItem extends Component {
-    render() {
-        return(
-            <div className="rn-sleep-history-list-item">
-                <div className="rn-sleep-history-list-item-date">
-                    <span className="rn-sleep-history-list-item-date-day">THU</span>
-                    <span className="rn-sleep-history-list-item-date-number">23</span>
-                </div>
-                <div className="rn-sleep-history-list-item-time">
-                    <span>8h 30m</span>
-                </div>
-                <div className="rn-sleep-history-list-item-mood">
-                    <div><i className="far fa-smile" /></div>
-                </div>
-                <button className="rn-sleep-history-list-item-delete definp">
-                    <i className="fas fa-trash" />
-                </button>
-            </div>
         );
     }
 }
@@ -221,23 +245,20 @@ class History extends Component {
                     <i className="fas fa-plus" />
                 </button>
                 <div className="rn-sleep-history-list">
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
-                    <HistoryItem />
+                    {
+                        (this.props.history) ? (
+                            this.props.history.map(({ id, time, rating, sleepMinutes }) => (
+                                <HistoryItem
+                                    key={ id }
+                                    time={ time }
+                                    rating={ rating }
+                                    sleepMinutes={ sleepMinutes }
+                                />
+                            ))
+                        ) : ( // even on err
+                            <LoadIcon />
+                        )
+                    }
                 </div>
             </div>
         );
@@ -251,7 +272,9 @@ class Hero extends Component {
         this.state = {
             lightTheme: true,
             addScrolled: false,
-            historyOpened: false
+            historyOpened: false,
+            sleepHistory: null,
+            sleepRecorded: null
         }
     }
     
@@ -267,6 +290,89 @@ class Hero extends Component {
         }
     }
 
+    recordSleep = (startTime, endTime, rating) => {
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        this.setState(() => ({
+            sleepRecorded: false
+        }));
+
+        client.mutate({
+            mutation: gql`
+                mutation($startTime: String!, $endTime: String!, $rating: Int!) {
+                    recordSleep(startTime: $startTime, endTime: $endTime, rating: $rating) {
+                        id,
+                        time,
+                        rating,
+                        sleepMinutes
+                    }
+                }
+            `,
+            variables: {
+                startTime,
+                endTime,
+                rating
+            }
+        }).then(({ data: { recordSleep: a } }) => {
+            this.setState(() => ({
+                sleepRecorded: true
+            }));
+
+            if(!a) return castError();
+
+            if(this.state.sleepHistory) {
+                this.setState(({ sleepHistory: b }) => ({
+                    sleepHistory: [
+                        a,
+                        ...b
+                    ]
+                }));
+            }
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
+    }
+
+    openHistory = () => {
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        this.setState(({ sleepHistory: a }) => ({
+            sleepHistory: a || false,
+            historyOpened: true,
+            sleepRecorded: null
+        }));
+
+        client.query({
+            query: gql`
+                query {
+                    user {
+                        id,
+                        sleeps {
+                            id,
+                            time,
+                            rating,
+                            sleepMinutes
+                        }
+                    }
+                }
+            `
+        }).then(({ data: { user: a } }) => {
+            if(!a) return castError();
+
+            this.setState(() => ({
+                sleepHistory: a.sleeps
+            }));
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
+    }
+
     render() {
         return(
             <div className={ `rn rn_nav rn-sleep${ (this.state.lightTheme) ? "" : " dark" }` }>
@@ -276,15 +382,18 @@ class Hero extends Component {
                             addScrolled: scrollTop > 0
                         }));
                     }}
+                    _onSubmit={ this.recordSleep }
+                    recorded={ this.state.sleepRecorded }
                 />
                 <History
                     active={ this.state.historyOpened }
                     onClose={ () => this.setState({ historyOpened: false }) }
+                    history={ this.state.sleepHistory }
                 />
                 {/* absolute bottom slide button >> div :: history (header: mid time, body: history) */}
                 <button
                     className={ `rn-sleep-history_shortcut definp${ (!this.state.addScrolled && !this.state.historyOpened) ? "" : " hidden" }` }
-                    onClick={ () => this.setState({ historyOpened: true }) }>
+                    onClick={ this.openHistory }>
                     <i className="fas fa-history" />
                 </button>
             </div>
@@ -295,7 +404,8 @@ class Hero extends Component {
 const mapStateToProps = () => ({});
 
 const mapActionsToProps = {
-    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "SLEEP_PAGE" })
+    notifyLoaded: () => ({ type: "NOTIFY_NEW_PAGE", payload: "SLEEP_PAGE" }),
+    castAlert: payload => ({ type: "CAST_GLOBAL_ERROR", payload })
 }
 
 export default connect(

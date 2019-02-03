@@ -120,7 +120,7 @@ const UserType = new GraphQLObjectType({
         weight: { type: GraphQLInt },
         sleeps: {
             type: new GraphQLList(SleepType),
-            resolve: ({ id }) => Sleep.find({ creatorID: id })
+            resolve: ({ id }) => Sleep.find({ creatorID: id }).sort({ createTime: -1 })
         },
         trainings: {
             type: new GraphQLList(TrainingType),
@@ -150,8 +150,12 @@ const UserType = new GraphQLObjectType({
         avgSleepTime: {
             type: GraphQLInt,
             async resolve({ id }) { // XXX
-                const a = await Sleep.find({ creatorID: str(id) }).select("sleepHours");
-                return (a.length) ? a.reduce((a, { sleepHours: b }) => a + b) / a.length : 0;
+                const a = await Sleep.find({ creatorID: str(id) }).select("sleepMinutes");
+
+                return (a.length) ? Math.floor(
+                    a.map(io => io.sleepMinutes / 60)
+                    .reduce((a, b) => a + b) / a.length
+                ) : 0;
             }
         },
         connectionsInt: {
@@ -229,11 +233,11 @@ const SleepType = new GraphQLObjectType({
     name: "Sleep",
     fields: () => ({
         id: { type: GraphQLID },
-        sleepHours: { type: GraphQLInt },
+        sleepMinutes: { type: GraphQLInt },
         time: { type: GraphQLString },
-        endTime: { type: GraphQLInt },
         rating: { type: GraphQLString },
         creatorID: { type: GraphQLID },
+        createTime: { type: GraphQLString },
         creator: {
             type: UserType,
             resolve: ({ creatorID }) => User.findById(creatorID)
@@ -454,6 +458,36 @@ const RootMutation = new GraphQLObjectType({
                 });
 
                 return true;
+            }
+        },
+        recordSleep: {
+            type: SleepType,
+            args: {
+                startTime: { type: new GraphQLNonNull(GraphQLString) },
+                endTime: { type: new GraphQLNonNull(GraphQLString) },
+                rating: { type: new GraphQLNonNull(GraphQLInt) }
+            },
+            async resolve(_, { startTime, endTime, rating }, { req }) {
+                if(!req.session.id || !req.session.authToken)
+                    throw new AuthenticationError("Not authenticated");
+
+                const sleep = await (
+                    new Sleep({
+                        sleepMinutes: Math.abs((+new Date(endTime) - +new Date(startTime)) / 60000),
+                        time: +new Date(startTime),
+                        creatorID: str(req.session.id),
+                        rating: rating,
+                        createTime: (+new Date).toString()
+                    })
+                ).save();
+
+                await User.findByIdAndUpdate(req.session.id, {
+                    $push: {
+                        appActivity: getDayDate()
+                    }
+                });
+
+                return sleep;
             }
         }
     }
