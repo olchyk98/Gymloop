@@ -191,10 +191,55 @@ class Add extends Component {
     }
 }
 
+class HistoryItem extends Component {
+    render() {
+        return(
+            <div className="rn-sleep-history-list-item">
+                <div className="rn-sleep-history-list-item-date">
+                    <span className="rn-sleep-history-list-item-date-day">THU</span>
+                    <span className="rn-sleep-history-list-item-date-number">23</span>
+                </div>
+                <div className="rn-sleep-history-list-item-time">
+                    <span>8h 30m</span>
+                </div>
+                <div className="rn-sleep-history-list-item-mood">
+                    <div><i className="far fa-smile" /></div>
+                </div>
+                <button className="rn-sleep-history-list-item-delete definp">
+                    <i className="fas fa-trash" />
+                </button>
+            </div>
+        );
+    }
+}
+
 class History extends Component {
     render() {
         return(
-            null
+            <div className={ `rn-sleep-history${ (!this.props.active) ? "" : " active" }` }>
+                <button className="definp rn-sleep-history-times" onClick={ this.props.onClose }>
+                    <i className="fas fa-plus" />
+                </button>
+                <div className="rn-sleep-history-list">
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                    <HistoryItem />
+                </div>
+            </div>
         );
     }
 }
@@ -232,9 +277,14 @@ class Hero extends Component {
                         }));
                     }}
                 />
-                <History />
+                <History
+                    active={ this.state.historyOpened }
+                    onClose={ () => this.setState({ historyOpened: false }) }
+                />
                 {/* absolute bottom slide button >> div :: history (header: mid time, body: history) */}
-                <button className={ `rn-sleep-history_shortcut definp${ (!this.state.addScrolled && !this.state.historyOpened) ? "" : " hidden" }` }>
+                <button
+                    className={ `rn-sleep-history_shortcut definp${ (!this.state.addScrolled && !this.state.historyOpened) ? "" : " hidden" }` }
+                    onClick={ () => this.setState({ historyOpened: true }) }>
                     <i className="fas fa-history" />
                 </button>
             </div>

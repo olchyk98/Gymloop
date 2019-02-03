@@ -1,3 +1,11 @@
+:root {
+    --sleep_history-close-size:45px;
+}
+
+.rn-sleep {
+    overflow:hidden;
+}
+
 .rn-sleep-add {
     height:100%;
     width:100%;
@@ -256,4 +264,138 @@
 .rn-sleep.dark .rn-sleep-add-submit:hover,
 .rn-sleep-history_shortcut:hover {
     background:#3fbbe0;
+}
+
+.rn-sleep-history {
+    --trans:.45s;
+
+    width:100vw;
+    height:calc(100vh - 95px);
+    position:absolute;
+    bottom:0;
+    transform:translateY(100%);
+    box-shadow:0px -1px 5px 0px rgba(0, 0, 0, .1);
+    z-index:5;
+    opacity:0;
+    visibility:hidden;
+    background:linear-gradient(90deg, #304363, #494373);
+    transition:all var(--trans), visibility var(--trans);
+}
+
+.rn-sleep-history.active {
+    transition:all var(--trans), visibility 0s;
+    visibility:visible;
+    opacity:1;
+    transform:translateY(0);
+}
+
+.rn-sleep-history-times {
+    height:var(--sleep_history-close-size);
+    width:var(--sleep_history-close-size);
+    top:calc(var(--sleep_history-close-size) / 2 * -1);
+    left:50%;
+    margin-right:50%;
+    border-radius:50%;
+    flex-shrink:0;
+    transform:translateX(-50%);
+    position:absolute;
+    cursor:pointer;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.075em;
+    color:rgba(0, 0, 0, .5);
+    box-shadow:0px -1px 10px -2.5px rgba(0, 0, 0, .25);
+}
+
+.rn-sleep-history-list {
+    height:calc(100% - var(--sleep_history-close-size));
+    top:var(--sleep_history-close-size);
+    overflow:scroll;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    position:relative;
+    bottom:15px;
+}
+
+.rn-sleep-history-list > * {
+    flex-shrink:0;
+}
+
+.rn-sleep-history-list-item {
+    --margin:15px;
+
+    padding:15px;
+    height:60px;
+    width:auto;
+    background:rgba(255, 255, 255, .05);
+    border-radius:5px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:var(--margin);
+    margin-bottom:var(--margin);
+}
+
+.rn-sleep-history-list-item > * {
+    --margin:7.5px;
+
+    margin-left:var(--margin);
+    margin-right:var(--margin);
+    background:rgba(255, 255, 255, .1);
+    padding:5px;
+    border-radius:2.5px;
+}
+
+.rn-sleep-history-list-item-date {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    min-width:50px;
+}
+
+.rn-sleep-history-list-item-date-day {
+    font-weight:300;
+    font-family:"Quicksand";
+    color:rgba(255, 255, 255, .5);
+    font-size:.9em;
+}
+
+.rn-sleep-history-list-item-date-number {
+    color:rgba(255, 255, 255, .9);
+    font-weight:400;
+    font-family:"Exo";
+    font-size:1.5em;
+}
+
+.rn-sleep-history-list-item-time {
+    font-weight:300;
+    font-family:"Exo";
+    color:rgba(255, 255, 255, .85);
+}
+
+.rn-sleep-history-list-item-mood {
+    color:rgba(255, 255, 255, .75);
+    font-size:1.25em;
+}
+
+.rn-sleep-history-list-item-mood > div {
+    position:relative;
+    bottom:-1.5px;
+}
+
+.rn-sleep-history-list-item-delete {
+    background:transparent;
+    color:rgba(255, 255, 255, .5);
+    cursor:pointer;
+    transition:.25s;
+}
+
+.rn-sleep-history-list-item-delete:hover {
+    color:rgba(255, 255, 255, .75);   
 }
