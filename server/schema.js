@@ -56,7 +56,8 @@ const UserType = new GraphQLObjectType({
         password: { type: GraphQLString },
         email: { type: GraphQLString },
         mainActivity: { type: GraphQLString },
-        heightCM: { type: GraphQLInt },
+        height: { type: GraphQLInt }, // in cm
+        age: { type: GraphQLInt },
         firstLogin: { type: GraphQLString },
         authTokens: { type: new GraphQLList(GraphQLString) },
         getMeals: {
@@ -331,10 +332,11 @@ const RootMutation = new GraphQLObjectType({
                     firstLogin: new Date,
                     authTokens: [token],
                     weight: 0,
+                    age: 0,
                     appActivity: [
                         getDayDate()
                     ],
-                    heightCM: 0,
+                    height: 0,
                     caloriesPerDay: 2000
                 })).save();
                 
@@ -505,6 +507,38 @@ const RootMutation = new GraphQLObjectType({
                 });
 
                 return true;
+            }
+        },
+        settingAccount: {
+            type: UserType,
+            args: {
+                age: { type: new GraphQLNonNull(GraphQLInt) },
+                weight: { type: new GraphQLNonNull(GraphQLInt) },
+                height: { type: new GraphQLNonNull(GraphQLInt) },
+                login: { type: new GraphQLNonNull(GraphQLString) },
+                email: { type: new GraphQLNonNull(GraphQLString) },
+                mainActivity: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            async resolve(_, { age, weight, height, login, email, mainActivity }, { req }) {
+                if(!req.session.id || !req.session.authToken)
+                    throw new AuthenticationError("Not authenticated");
+
+                let a = await User.findById(req.session.id);
+
+                const b = {}
+                if(age) b.age = age;
+                if(weight) b.weight = weight;
+                if(height) b.height = height;
+                if(login) b.login = login;
+                if(email) b.email = email;
+                if(mainActivity) b.mainActivity = mainActivity;
+
+                await a.updateOne(b);
+
+                return ({
+                    ...a,
+                    ...b
+                });
             }
         }
     }

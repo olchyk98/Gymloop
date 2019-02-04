@@ -5,6 +5,10 @@
     justify-content:center;
 }
 
+.rn-settings > * {
+    flex-shrink:0;
+}
+
 .rn-settings-title {
     font-family:"Quicksand";
     font-weight:400;
@@ -16,17 +20,19 @@
 }
 
 .rn-settings-insert {
+    margin:7.5px;
     display:flex;
     flex-direction:column;
     width:auto;
     align-items:flex-start;
+    width:100%;
 }
 
 .rn-settings-insert-title {
     font-family:"Lato";
     font-weight:500;
     font-size:.75em;
-    margin-bottom:15px;
+    margin-bottom:10px;
     text-transform:uppercase;
 }
 
@@ -36,6 +42,7 @@
     height:40px;
     width:175px;
     border-radius:2.5px;
+    font-size:.95em;
     border:2px solid rgba(0, 0, 0, .25);
     padding-left:var(--padding);
     padding-right:var(--padding);
@@ -48,7 +55,7 @@
     height:var(--height);
     border-radius:var(--height);
     background:rgba(0, 0, 0, .1);
-    width:145px;
+    width:100%;
     position:relative;
     transition:.25s;
 }
@@ -90,6 +97,7 @@
     cursor:pointer;
     position:relative;
     left:-1px;
+    z-index:3;
     border-radius:50%;
 }
 
@@ -106,10 +114,17 @@
     background:var(--col);
     border-radius:2.5px;
     font-weight:300;
+    opacity:0;
+    transition:.25s;
     position:absolute;
     font-family:"Quicksand";
     font-size:.8em;
     color:rgba(255, 255, 255, .95);
+    box-shadow:0px 0px 5px 0px rgba(0, 0, 0, .25);
+}
+
+.rn-settings-cslider:focus span {
+    opacity:1;
 }
 
 .rn-settings-cslider > div > span:before {
@@ -124,4 +139,171 @@
     transform:translateX(-50%) rotate(45deg);
     height:var(--size);
     width:var(--size);
+}
+
+.rn-settings-activityfield_container {
+    align-items:center;
+}
+
+.rn-settings-activityfield {
+    --vpdd:15px;
+
+    position:relative;
+    max-width:calc(100% - var(--vpdd));
+}
+
+.rn-settings-activityfield-display {
+    width:475px;
+    max-width:calc(100% - var(--vpdd));
+    height:35px;
+    border:2px solid rgba(0, 0, 0, .1);
+    font-size:.95em;
+    transition:.25s;
+}
+
+.rn-settings-activityfield:hover .rn-settings-activityfield-display {
+    box-shadow:0px 0px 10px -2.5px rgba(0, 0, 0, .25);
+}
+
+.rn-settings-activityfield-display > span {
+    --padding:7.5px;
+    --height:calc(25px - var(--padding) * 2);;
+    
+    padding:var(--padding);
+    height:var(--height);
+    border-radius:2.5px;
+    background:rebeccapurple;
+    color:white;
+    font-size:.925em;
+    font-weight:300;
+    font-family:"Quicksand";
+    line-height:calc(var(--height) + 1.5px);
+    position:absolute;
+    top:50%;
+    white-space:nowrap;
+    text-transform:capitalize;
+    left:50%;
+    margin-right:50%;
+    transform:translate(-50%, -50%);
+}
+
+.rn-settings-activityfield-grid {
+    --padding:15px;
+    --trans:.15s linear;
+
+    position:absolute;
+    top:0;
+    transform:translateY(-100%);
+    left:0;
+    padding:var(--padding);
+    width:calc(100% - var(--padding) * 2);
+    height:calc(300px - var(--padding) * 2);
+    box-shadow:0px 0px 10px -2.5px rgba(0, 0, 0, .25);
+    background:white;
+    z-index:5;
+    opacity:0;
+    visibility:hidden;
+    border-radius:2.5px;
+    display:grid;
+    grid-template-rows:repeat(3, 1fr);
+    grid-template-columns:repeat(3, 1fr);
+    align-items:center;
+    /* display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:space-between; */
+    overflow:scroll;
+    transition:all var(--trans), visibility var(--trans);
+}
+
+.rn-settings-activityfield:hover .rn-settings-activityfield-grid {
+    transition:all var(--trans), visibility 0s;
+    opacity:1;
+    visibility:visible;
+}
+
+.rn-settings-activityfield-grid-item {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.rn-settings-activityfield-grid-item-icon {
+    --size:45px;
+    --hovercol:rebeccapurple;
+
+    height:var(--size);
+    width:var(--size);
+    border:1px solid rgba(0, 0, 0, .1);
+    border-radius:2.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.25s;
+    cursor:pointer;
+}
+
+.rn-settings-activityfield-grid-item:hover .rn-settings-activityfield-grid-item-icon,
+.rn-settings-activityfield-grid-item.active .rn-settings-activityfield-grid-item-icon {
+    border:1px solid var(--hovercol);
+}
+
+.rn-settings-activityfield-grid-item-icon > div {
+    color:rgba(0, 0, 0, .5);
+    font-size:1.5em;
+    position:relative;
+    bottom:-1.5px;
+}
+
+.rn-settings-activityfield-grid-item:hover .rn-settings-activityfield-grid-item-icon > div,
+.rn-settings-activityfield-grid-item.active .rn-settings-activityfield-grid-item-icon > div {
+    color:var(--hovercol);
+}
+
+.rn-settings-activityfield-grid-item-title {
+    margin-top:2.5px;
+    color:rgba(0, 0, 0, .9);
+    font-weight:400;
+    font-size:.9em;
+    font-family:"Exo";
+    user-select:none;
+    flex-shrink:0;
+}
+
+.rn-settings-row {
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    max-width:100%;
+    position:relative;
+}
+
+.rn-settings-container {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    flex-direction:column;
+    position:relative;
+    margin:15px;
+}
+
+.rn-settings-submit {
+    max-width:calc(100% - 15px);
+    width:145px;
+    height:37.5px;
+    cursor:pointer;
+    border-radius:3px;
+    background:rebeccapurple;
+    color:white;
+    font-family:"Quicksand";
+    font-weight:400;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.25s;
+}
+
+.rn-settings-submit.submitting {
+    background:transparent;
 }
