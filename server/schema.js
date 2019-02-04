@@ -106,13 +106,69 @@ const UserType = new GraphQLObjectType({
                 ) : 0;
             }
         },
+        burnedCaloriesMonth: {
+            type: GraphQLInt,
+            async resolve({ id, weight }) {
+                let a = 0; // calories
+                const b = +new Date();
+
+                if(weight) {
+                    /*
+                        A person who weighs 125 pounds burns approximately
+                        38 calories per hour sleeping.
+
+                        125 pounds ~ 56kg
+
+                        :: https://www.healthline.com/health/calories-burned-sleeping#1 ::
+                    */
+
+                    let c = await Sleep.find({
+                        creatorID: str(id),
+                        $and: [
+                            {time: {
+                                $gt: b - 2678400000
+                            }},
+                            {time: {
+                                $lte: b
+                            }}
+                        ]
+                    }).select("sleepMinutes");
+
+                    if(c.length) {
+                        a += c.map(io => io.sleepMinutes / 60).reduce( (a, b) => a + weight / 56 * 38 * b );
+                    }
+                }
+
+                // Traning
+                let c = await Training.find({
+                    people: {
+                        $in: [str(id)]
+                    },
+                    $and: [
+                        {time: {
+                            $gt: b - 86400000
+                        }},
+                        {time: {
+                            $lte: b
+                        }}
+                    ]
+                }).select("destroyedCalories");
+
+                if(c.length) {
+                    a += c.map(io => io.destroyedCalories).reduce((a, b) => a + b);
+                }
+
+                // Return value
+                return Math.floor(a);
+
+            }
+        },
         connections: {
             type: new GraphQLList(UserType),
-            resolve: ({ connections }) => User.find({
-                _id: {
-                    $in: connections
-                }
-            })
+            resolve() {
+                // TODO
+                return null;
+            }
         },
         lastAuthToken: {
             type: GraphQLString,
@@ -130,23 +186,6 @@ const UserType = new GraphQLObjectType({
                     $in: [str(id)]
                 }
             })
-        },
-        monthCalories: {
-            type: GraphQLInt,
-            async resolve({ id }) {
-                // TODO: Calculate food calories
-
-                let a = await Training.find({
-                    startTime: {
-                        $gte: +new Date - 2678400000 // last 30 days
-                    },
-                    people: {
-                        $in: [str(id)]
-                    }
-                }).select("destroyedCalories");
-
-                return (a.length) ? a.reduce((a, { destroyedCalories: b }) => a + b) : 0;
-            }
         },
         avgSleepTime: {
             type: GraphQLInt,
@@ -252,7 +291,7 @@ const TrainingType = new GraphQLObjectType({
         id: { type: GraphQLID },
         destroyedCalories: { type: GraphQLInt },
         minutes: { type: GraphQLInt },
-        startTime: { type: GraphQLString },
+        time: { type: GraphQLString },
         action: { type: GraphQLString },
         people: {
             type: new GraphQLList(UserType),
@@ -515,11 +554,12 @@ const RootMutation = new GraphQLObjectType({
                 age: { type: new GraphQLNonNull(GraphQLInt) },
                 weight: { type: new GraphQLNonNull(GraphQLInt) },
                 height: { type: new GraphQLNonNull(GraphQLInt) },
+                caloriesPerDay: { type: new GraphQLNonNull(GraphQLInt) },
                 login: { type: new GraphQLNonNull(GraphQLString) },
                 email: { type: new GraphQLNonNull(GraphQLString) },
-                mainActivity: { type: new GraphQLNonNull(GraphQLString) },
+                mainActivity: { type: new GraphQLNonNull(GraphQLString) }
             },
-            async resolve(_, { age, weight, height, login, email, mainActivity }, { req }) {
+            async resolve(_, { age, weight, height, login, email, mainActivity, caloriesPerDay }, { req }) {
                 if(!req.session.id || !req.session.authToken)
                     throw new AuthenticationError("Not authenticated");
 
@@ -532,6 +572,7 @@ const RootMutation = new GraphQLObjectType({
                 if(login) b.login = login;
                 if(email) b.email = email;
                 if(mainActivity) b.mainActivity = mainActivity;
+                if(caloriesPerDay) b.caloriesPerDay = caloriesPerDay;
 
                 await a.updateOne(b);
 

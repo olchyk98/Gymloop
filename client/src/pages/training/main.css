@@ -1,0 +1,64 @@
+.rn-training {
+    display:flex;
+    align-items:stretch;
+}
+
+.rn-training-info {
+    --padding:20px;
+    
+    padding:var(--padding);
+    height:calc(var(--height) - var(--padding) * 2);
+    width:calc(30% - var(--padding) * 2);
+    max-width:350px;
+    flex-shrink:0;
+    background:#17181B;
+}
+
+.rn-training-info-title {
+    font-size:2.15em;
+    margin:0;
+    margin-bottom:15px;
+    font-family:"Quicksand";
+    font-weight:400;
+    color:white;
+}
+
+.rn-training-info-desc {
+    --margin:10px;
+
+    margin-top:var(--margin);
+    margin-bottom:var(--margin);
+    font-family:"Quicksand";
+    font-weight:200;
+    color:rgba(255, 255, 255, .85);
+    font-size:1em;
+}
+
+.rn-training-info-historybtn {
+    --paddinglr:20px;
+    --paddingud:10px;
+
+    border-radius:2.5px;
+    border:1px solid rgba(255, 255, 255, .5);
+    color:rgba(255, 255, 255, .9);
+    font-family:"Quicksand";
+    cursor:pointer;
+    font-weight:400;
+    font-size:.95em;
+    margin-top:5px;
+    padding:var(--paddingud) var(--paddinglr) var(--paddingud) var(--paddinglr);
+    transition:.45s;
+}
+
+.rn-training-info-historybtn:hover {
+    border-color:rgba(255, 255, 255, .75);
+}
+
+.rn-training-info-historybtn:active {
+    transition:.1s;
+    transform:scale(.975);
+}
+
+.rn-training-create {
+    width:100%;
+}

@@ -47,9 +47,14 @@ class Hero extends Component {
                 {
                     [
                         {
-                            icon: <i className="fas fa-bed"></i>,
-                            mark: "SLEEP_PAGE",
-                            name: "Sleep"
+                            icon: <i className="fas fa-drumstick-bite" />,
+                            mark: "FOOD_STATS_PAGE",
+                            name: "Food"
+                        },
+                        {
+                            icon: <i className="fas fa-dumbbell" />,
+                            mark: "TRAINING_PAGE",
+                            name: "Training"
                         },
                         {
                             icon: <i className="fas fa-home" />,
@@ -57,9 +62,9 @@ class Hero extends Component {
                             name: "Home"
                         },
                         {
-                            icon: <i className="fas fa-drumstick-bite" />,
-                            mark: "FOOD_STATS_PAGE",
-                            name: "Food"
+                            icon: <i className="fas fa-bed" />,
+                            mark: "SLEEP_PAGE",
+                            name: "Sleep"
                         },
                         {
                             icon: <i className="fas fa-cogs" />,

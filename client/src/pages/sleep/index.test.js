@@ -26,31 +26,31 @@ describe('Test root sleep page', () => {
 
         // expect( element.instance().submit() ).toEqual([ 7.4, 24.5, 15.1, 10.9 ])
     });
-});
 
-describe('Test sleep_page>HistoryItem component', () => {
-    // I can create element once, because I won't change it.
-    const element = shallow(
-        <HistoryItem
-            time={ "1549213083698" } // Sun Feb 03 2019 17:58:03 GMT+0100
-            rating="4"
-            sleepMinutes="256"
-        />
-    ).instance();
+    {
+        // I won't change this element.
+        const element = shallow(
+            <HistoryItem
+                time={ "1549213083698" } // Sun Feb 03 2019 17:58:03 GMT+0100
+                rating="4"
+                sleepMinutes="256"
+            />
+        ).instance();
 
-    it('Test getDate function', () => {
-        expect( element.getDate() ).toBe(3);
-    });
+        it('Test getDate function', () => {
+            expect( element.getDate() ).toBe(3);
+        });
 
-    it('Test getMonth function', () => { 
-        expect( element.getMonth() ).toBe('FEB');
-    });
+        it('Test getMonth function', () => { 
+            expect( element.getMonth() ).toBe('FEB');
+        });
 
-    it('Test getDuration function', () => {
-        expect( element.getDuration() ).toBe('4h 16m');
-    });
+        it('Test getDuration function', () => {
+            expect( element.getDuration() ).toBe('4h 16m');
+        });
 
-    it('Test smile rating', () => {
-        expect( element.getSmile() ).toBe('far fa-smile-wink');
-    });
+        it('Test smile rating', () => {
+            expect( element.getSmile() ).toBe('far fa-smile-wink');
+        });
+    }
 });

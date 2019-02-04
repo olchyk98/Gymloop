@@ -14,6 +14,10 @@ const links = {
     "SETTINGS_PAGE": {
         route: '/settings',
         absolute: '/settings'
+    },
+    "TRAINING_PAGE": {
+        route: '/training/:id?',
+        absolute: '/training'
     }
 }
 

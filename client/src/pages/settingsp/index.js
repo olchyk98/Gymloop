@@ -44,7 +44,7 @@ class Slider extends Component {
         this.setState(() => ({
             clientX: (
                 this.sliderRef.getBoundingClientRect().width / 100 *
-                (this.props.value / this.props.maxValue * 100) +
+                (this.props.value / this.props.maxValue * 100) -
                 this.cursorRef.getBoundingClientRect().width / 2
             )
         }))
@@ -162,8 +162,8 @@ class ActivityField extends Component {
             },
             {
                 icon: <i className="fas fa-fish" />,
-                title: "Fish",
-                label: "FISH_LABEL"
+                title: "Fishing",
+                label: "FISHING_LABEL"
             },
             {
                 icon: <i className="fas fa-dumbbell" />,
@@ -217,6 +217,7 @@ class Hero extends Component {
                 age: 0,
                 weight: 0,
                 height: 0,
+                caloriesPerDay: 0,
                 login: "",
                 password: "",
                 email: "",
@@ -247,7 +248,8 @@ class Hero extends Component {
                         height,
                         login,
                         email,
-                        mainActivity
+                        mainActivity,
+                        caloriesPerDay
                     }
                 } 
             `
@@ -260,6 +262,7 @@ class Hero extends Component {
                     age: a.age || 0,
                     weight: a.weight || 0,
                     height: a.height || 0,
+                    caloriesPerDay: a.caloriesPerDay || 0,
                     login: a.login || "",
                     email: a.email || "",
                     mainActivity: a.mainActivity || ""
@@ -287,20 +290,37 @@ class Hero extends Component {
         
         const castError = a => this.props.castAlert({ text: a });
 
-        const { age, weight, height, login, email, mainActivity } = this.state.settings;
+        const { age, weight, height, login, email, mainActivity, caloriesPerDay } = this.state.settings;
         
         client.mutate({
             mutation: gql`
-                mutation($age: Int!, $weight: Int!, $height: Int!, $login: String!, $email: String!, $mainActivity: String!) {
-                    settingAccount(age: $age, weight: $weight, height: $height, login: $login, email: $email, mainActivity: $mainActivity) {
-                        id
+                mutation(
+                    $age: Int!
+                    $weight: Int!
+                    $height: Int!
+                    $login: String!
+                    $email: String!
+                    $mainActivity: String!
+                    $caloriesPerDay: Int!
+                ) {
+                    settingAccount(
+                      age: $age
+                      weight: $weight
+                      height: $height
+                      login: $login
+                      email: $email
+                      mainActivity: $mainActivity
+                      caloriesPerDay: $caloriesPerDay
+                    ) {
+                      id
                     }
                 }
             `,
             variables: {
                 age, weight,
                 height, login,
-                email, mainActivity
+                email, mainActivity,
+                caloriesPerDay
             }
         }).then(({ data: { settingAccount: a } }) => {
             if(!a) return castError("Internal server error");
@@ -362,6 +382,13 @@ class Hero extends Component {
                                 maxValue={ 200 }
                                 title="Age"
                                 _onChange={ value => this.setSettingsVal("age", value) }
+                                _disabled={ this.state.submittingSettings }
+                            />
+                            <Slider
+                                value={ this.state.settings.caloriesPerDay }
+                                maxValue={ 20000 }
+                                title="Calories per day"
+                                _onChange={ value => this.setSettingsVal("caloriesPerDay", value) }
                                 _disabled={ this.state.submittingSettings }
                             />
                             <TxtField

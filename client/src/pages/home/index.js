@@ -44,7 +44,7 @@ class Hero extends Component {
                         id,
                         mainActivity,
                         appActivityMonthGraph,
-                        monthCalories,
+                        burnedCaloriesMonth,
                         weight,
                         avgSleepTime,
                         connectionsInt
@@ -57,8 +57,16 @@ class Hero extends Component {
                 return console.error("Looks like it's an auth problem.");
             }
 
+            /* Create a copy of the object,
+               because graphql returns changed object
+               after component hard re-rendering action.
+
+               Such as double react-router rendering (rendering current page(component))
+            */
+            const rec = { ...a };
+
             // Activity
-            a.mainActivity = (
+            rec.mainActivity = (
                 {
                     "RUNNING_LABEL": "Running",
                     "WALKING_LABEL": "Walking",
@@ -66,23 +74,23 @@ class Hero extends Component {
                     "SWIMMING_LABEL": "Swimming",
                     "NORDIC_SKIING": "Nordic Skiing",
                     "TENNIS_LABEL": "Tennis",
-                    "FISH_LABEL": "Fish",
+                    "FISHING_LABEL": "Fishing",
                     "GYM_LABEL": "Gym"
-                }[a.mainActivity] || "?"
+                }[rec.mainActivity] || "?"
             );
 
             // Actions Graph
-            a.actionsMonthGraph = a.appActivityMonthGraph.map((io, ia) => ({
+            rec.actionsMonthGraph = rec.appActivityMonthGraph.map((io, ia) => ({
                 x: ia * 10,
                 y: io
             }));
 
             // Weight
-            a.weight = a.weight || "?";
+            rec.weight = rec.weight || "?";
 
             // Submit
             this.setState(() => ({
-                userData: a
+                userData: rec
             }));
         }).catch(err => {
             console.error(err);
@@ -202,7 +210,7 @@ class Hero extends Component {
                             </div>
                             {
                                 (this.state.userData !== false) ? (
-                                    <span className="rn-home-block-info-value">{ this.state.userData.monthCalories }</span>
+                                    <span className="rn-home-block-info-value">{ this.state.userData.burnedCaloriesMonth }</span>
                                 ) : (
                                     <Placeholder
                                         _style={{
@@ -297,7 +305,7 @@ class Hero extends Component {
                             },
                             {
                                 icon: <i className="fas fa-dumbbell" />,
-                                title: "Start training",
+                                title: "Record training",
                                 routeButton: "Start",
                                 action: () => {
                                     // this.props.history.push(links["HOME_PAGE"].absolute);
@@ -308,7 +316,7 @@ class Hero extends Component {
                                 title: "Record sleep time",
                                 routeButton: "Record",
                                 action: () => {
-                                    // this.props.history.push(links["HOME_PAGE"].absolute);
+                                    this.props.history.push(links["SLEEP_PAGE"].absolute);
                                 }
                             }
                         ].map(({ icon, title, routeButton, action }, index) => (
