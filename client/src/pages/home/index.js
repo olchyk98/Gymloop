@@ -60,7 +60,14 @@ class Hero extends Component {
             // Activity
             a.mainActivity = (
                 {
-                    "RUN_ACTIVITY": "Run"
+                    "RUNNING_LABEL": "Running",
+                    "WALKING_LABEL": "Walking",
+                    "SKIING_LABEL": "Skiing",
+                    "SWIMMING_LABEL": "Swimming",
+                    "NORDIC_SKIING": "Nordic Skiing",
+                    "TENNIS_LABEL": "Tennis",
+                    "FISH_LABEL": "Fish",
+                    "GYM_LABEL": "Gym"
                 }[a.mainActivity] || "?"
             );
 
@@ -104,6 +111,8 @@ class Hero extends Component {
         return b + " " + c;
     }
 
+    openSettings = () => this.props.history.push(links["SETTINGS_PAGE"].absolute);
+
     render() {
         return(
             <div className="rn rn_nav rn-home">
@@ -111,7 +120,7 @@ class Hero extends Component {
                     <div className="rn-home-block rn-home-mainact">
                         <div className="rn-home-mainact-title">
                             <span>Your main activity is</span>
-                            <button className="definp">
+                            <button className="definp" onClick={ this.openSettings }>
                                 <i className="fas fa-cog" />
                             </button>
                         </div>
@@ -209,7 +218,7 @@ class Hero extends Component {
                     <div className="rn-home-block rn-home-weight red">
                         <div className="rn-home-block-title rn-home-weight-title">
                             <span>Your current weight</span>
-                            <button className="definp">
+                            <button className="definp" onClick={ this.openSettings }>
                                 <i className="fas fa-cog" />
                             </button>
                         </div>

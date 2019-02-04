@@ -121,17 +121,17 @@ class ActivityField extends Component {
         this.defArc = [
             {
                 icon: <i className="fas fa-running" />,
-                title: "running",
+                title: "Running",
                 label: "RUNNING_LABEL"
             },
             {
                 icon: <i className="fas fa-walking" />,
-                title: "walking",
+                title: "Walking",
                 label: "WALKING_LABEL"
             },
             {
                 icon: <i className="fas fa-skiing" />,
-                title: "skiing",
+                title: "Skiing",
                 label: "SKIING_LABEL"
             },
             {
