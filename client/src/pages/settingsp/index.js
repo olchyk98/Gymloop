@@ -39,6 +39,17 @@ class Slider extends Component {
         this.cursorRef = React.createRef();
     }
 
+    componentDidMount() {
+
+        this.setState(() => ({
+            clientX: (
+                this.sliderRef.getBoundingClientRect().width / 100 *
+                (this.props.value / this.props.maxValue * 100) +
+                this.cursorRef.getBoundingClientRect().width / 2
+            )
+        }))
+    }
+
     moveSlider = (_) => { // { clientX }
         if(!this.state.changing || this.props._disabled) return;
 
@@ -256,7 +267,7 @@ class Hero extends Component {
             }));
         }).catch((e) => {
             console.error(e);
-            castError("Connection interrupted")
+            castError("Connection interrupted");
         });;
     }
 
