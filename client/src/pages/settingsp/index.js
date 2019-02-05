@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import './main.css';
 
 import { connect } from 'react-redux';
@@ -7,6 +6,8 @@ import { gql } from 'apollo-boost';
 
 import client from  '../../apollo';
 import LoadIcon from '../__forall__/load.icon';
+import Slider from '../__forall__/slider'; 
+import ActivityField from '../__forall__/activity.field';
 
 class TxtField extends Component {
     render() {
@@ -21,185 +22,6 @@ class TxtField extends Component {
                     defaultValue={ this.props._defaultValue }
                     disabled={ this.props._disabled }
                 />
-            </div>
-        );
-    }
-}
-
-class Slider extends Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            clientX: 0,
-            changing: false
-        }
-
-        this.sliderRef = React.createRef();
-        this.cursorRef = React.createRef();
-    }
-
-    componentDidMount() {
-
-        this.setState(() => ({
-            clientX: (
-                this.sliderRef.getBoundingClientRect().width / 100 *
-                (this.props.value / this.props.maxValue * 100) -
-                this.cursorRef.getBoundingClientRect().width / 2
-            )
-        }))
-    }
-
-    moveSlider = (_) => { // { clientX }
-        if(!this.state.changing || this.props._disabled) return;
-
-        const clientX = _.clientX || _.changedTouches[0].pageX; // Mouse or touch
-
-        const a = this.sliderRef.getBoundingClientRect(),
-              b = this.cursorRef.getBoundingClientRect().width,
-              c = (
-                clientX - a.left -
-                this.cursorRef.getBoundingClientRect().width / 2
-            );
-
-        if(c < 0 || clientX + b / 2 > a.left + a.width) return;
-
-        const d = 100 / ((a.width - b) / c);
-
-        const e = Math.round(this.props.maxValue / 100 * d);
-
-        this.setState(() => ({
-            clientX: c
-        }), () => this.props._onChange(e));
-    }
-
-    render() {
-        return(
-            <div
-                className="rn-settings-insert"
-                onMouseUp={ () => this.setState({ changing: false }) }
-                onTouchEnd={ () => this.setState({ changing: false }) }
-                onMouseMove={ this.moveSlider }
-                onTouchMove={ this.moveSlider }>
-                <span className="rn-settings-insert-title">{ this.props.title }</span>
-                <div
-                    ref={ ref => this.sliderRef = ref }
-                    className="rn-settings-cslider"                    
-                    tabIndex="-1">
-                    <div
-                        style={{
-                            left: this.state.clientX + "px"
-                        }}
-                        onMouseDown={ () => this.setState({ changing: true }) }
-                        onTouchStart={ () => this.setState({ changing: true }) }
-                        ref={ ref => this.cursorRef = ref }>
-                        <span>{ this.props.value }</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
-Slider.propTypes = {
-    maxValue: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    _onChange: PropTypes.func.isRequired
-}
-
-class ActivityFieldItem extends Component {
-    render() {
-        return(
-            <div
-                className={ `rn-settings-activityfield-grid-item${ (!this.props.active) ? "" : " active" }` }
-                onClick={ () => this.props.onChoose(this.props.label) }>
-                <div className="rn-settings-activityfield-grid-item-icon">
-                    <div>
-                        { this.props.icon }
-                    </div>
-                </div>
-                <span className="rn-settings-activityfield-grid-item-title">{ this.props.title }</span>
-            </div>
-        );
-    }
-}
-
-class ActivityField extends Component {
-    constructor(props) {
-        super(props);
-
-        this.defArc = [
-            {
-                icon: <i className="fas fa-running" />,
-                title: "Running",
-                label: "RUNNING_LABEL"
-            },
-            {
-                icon: <i className="fas fa-walking" />,
-                title: "Walking",
-                label: "WALKING_LABEL"
-            },
-            {
-                icon: <i className="fas fa-skiing" />,
-                title: "Skiing",
-                label: "SKIING_LABEL"
-            },
-            {
-                icon: <i className="fas fa-swimmer" />,
-                title: "swimming",
-                label: "SWIMMING_LABEL"
-            },
-            {
-                icon: <i className="fas fa-skiing-nordic" />,
-                title: "Nordic Skiing",
-                label: "NORDIC_SKIING"
-            },
-            {
-                icon: <i className="fas fa-table-tennis" />,
-                title: "Tennis",
-                label: "TENNIS_LABEL"
-            },
-            {
-                icon: <i className="fas fa-fish" />,
-                title: "Fishing",
-                label: "FISHING_LABEL"
-            },
-            {
-                icon: <i className="fas fa-dumbbell" />,
-                title: "Gym",
-                label: "GYM_LABEL"
-            }
-        ];
-    }
-
-    render() {
-        return(
-            <div className="rn-settings-insert rn-settings-activityfield_container">
-                <span className="rn-settings-insert-title">Main Activity</span>
-                <div className="rn-settings-activityfield">
-                    <div className="rn-settings-activityfield-grid">
-                        {
-                            this.defArc.map(({ icon, title, label }, index) => (
-                                <ActivityFieldItem
-                                    key={ index }
-                                    icon={ icon }
-                                    title={ title }
-                                    label={ label }
-                                    active={ this.props.currentActivity === label }
-                                    onChoose={ this.props.selectActivity }
-                                />       
-                            ))
-                        }
-                    </div>
-                    <div className="rn-settings-activityfield-display">
-                        {
-                            (this.props.currentActivity) ? (
-                                    <span>{ this.defArc.find(io => io.label === this.props.currentActivity).title }</span>
-                            ) : null
-                        }
-                    </div>
-                </div>
             </div>
         );
     }
@@ -339,10 +161,6 @@ class Hero extends Component {
             return(
                 <form className="rn rn_nav rn-settings" onSubmit={ e => { e.preventDefault(); this.submitSettings() } }>
                     <h1 className="rn-settings-title">Your settings</h1>
-                    {/* <Slider
-                        value={ this.state.settings.age }
-                        _onChange={ value => this.setSettingsVal("age", value) }
-                    /> */}
                     <div className="rn-settings-row">
                         <div className="rn-settings-container">
                             <Slider
