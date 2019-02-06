@@ -187,18 +187,28 @@
 }
 
 .rn-training-peoplefield-search-users-item {
+    --padding:5px;
+
+    width:calc(100% - var(--padding) * 2);
+    padding-left:var(--padding);
+    padding-right:var(--padding);
     display:flex;
     align-items:center;
     height:35px;
     border-bottom:1px solid var(--defaultborder);
     transition:.25s;
+    border-radius:2.5px;
+}
+
+.rn-training-peoplefield-search-users-item.selected {
+    background:#23AED8;
 }
 
 .rn-training-peoplefield-search-users-item:first-child {
     border-top:1px solid var(--defaultborder);
 }
 
-.rn-training-peoplefield-search-users-item:hover {
+.rn-training-peoplefield-search-users-item:not(.selected):hover {
     background:rgba(0, 0, 0, .01);
 }
 
@@ -225,6 +235,10 @@
     font-family:"Lato";
     font-weight:400;
     font-size:.95rem;
+}
+
+.rn-training-peoplefield-search-users-item.selected > .rn-training-peoplefield-search-users-item-name {
+    color:white;
 }
 
 .rn-training-peoplefield_outbg {

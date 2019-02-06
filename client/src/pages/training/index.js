@@ -2,20 +2,24 @@ import React, { Component, Fragment } from 'react';
 import './main.css';
 
 import { connect } from 'react-redux';
+import { gql } from 'apollo-boost';
 
+import client from '../../apollo';
+import api from '../../api';
+import LoadIcon from '../__forall__/load.icon';
 import Slider from '../__forall__/slider';
 import ActivityField from '../__forall__/activity.field';
 
-const image = "https://yt3.ggpht.com/a-/AAuE7mBI2D0yaaqOGm13D9XuVRv2zFmej83jOrt9cg=s48-mo-c-c0xffffffff-rj-k-no";
+const inviteSuggLimit = 15;
 
 class PeopleFieldItem extends Component {
     render() {
         return(
-            <div className="rn-training-peoplefield-search-users-item">
+            <div className={ `rn-training-peoplefield-search-users-item${ (!this.props.selected) ? "" : " selected" }` } onClick={ this.props._onClick }>
                 <div className="rn-training-peoplefield-search-users-item-avatar">
-                    <img src={ image } alt="user avatar" />
+                    <img src={ api.storage + this.props.image } alt="user avatar" />
                 </div>
-                <span className="rn-training-peoplefield-search-users-item-name">Oles Odynets</span>
+                <span className="rn-training-peoplefield-search-users-item-name">{ this.props.name }</span>
             </div>
         );
     }
@@ -37,7 +41,10 @@ class PeopleField extends Component {
                     onClick={ () => this.setState({ opened: false }) }
                 />
                 <div className="rn-training-peoplefield">
-                    <span className="rn-training-peoplefield-countd" onClick={ () => this.setState({ opened: true }) }>0 people invited</span>
+                    <span className="rn-training-peoplefield-countd" onClick={() => {
+                        this.setState({ opened: true });
+                        this.props.onOpen();
+                    }}>{ this.props.invitedPeople } people invited</span>
                     <div className={ `rn-training-peoplefield-search${ (!this.state.opened) ? "" : " opened" }` }>
                         <input className="rn-training-peoplefield-search-mat definp"
                             type="search"
@@ -45,13 +52,20 @@ class PeopleField extends Component {
                         />
                         <span className="rn-training-peoplefield-search-ustit">Search results</span>
                         <div className="rn-training-peoplefield-search-users">
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
-                            <PeopleFieldItem />
+                            {
+                                (!this.props.suggestions) ? (
+                                    <LoadIcon />
+                                ) : (
+                                    this.props.users.map(({ id, avatar, name }) => (
+                                        <PeopleFieldItem
+                                            key={ id }
+                                            avatar={ avatar }
+                                            name={ name }
+                                            _onClick={ () => this.props.onTogglePeople(id) }
+                                        />
+                                    ))
+                                )
+                            }
                         </div>
                     </div>
                 </div>
@@ -69,12 +83,48 @@ class Hero extends Component {
             minutes: 0,
             action: "",
             people: [],
-            creatingItem: false
+            creatingItem: false,
+            peopleSuggestions: null
         }
     }
 
     componentDidMount() {
         this.props.notifyLoaded();
+    }
+
+    loadPeopleSugg = (name = null) => {
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        let offsetID = this.state.people.slice(-1);
+        offsetID = (offsetID && offsetID[0]) || null;
+
+        client.query({
+            query: gql`
+                query($offsetID: ID, $name: String, $limit: Int) {
+                    getTrainingPeopleSuggestions(offsetID: $offsetID, name: $name, limit: $limit) {
+                        id,
+                        avatar,
+                        login
+                    }
+                }
+            `,
+            variables: {
+                offsetID,
+                name,
+                limit: inviteSuggLimit
+            }
+        }).then(({ data: { getTrainingPeopleSuggestions: a } }) => {
+            if(!a) return castError();
+            
+            this.setState(() => ({
+                peopleSuggestions: a
+            }));
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
     }
 
     render() {
@@ -108,7 +158,23 @@ class Hero extends Component {
                             selectActivity={ label => this.setState({ action: label }) }
                         />
                         <PeopleField
-
+                            onOpen={() => {
+                                if(!this.state.peopleSuggestions) {
+                                    this.setState(() => ({
+                                        peopleSuggestions: true
+                                    }));
+                                    this.loadPeopleSugg();
+                                }
+                            }}
+                            invitedPeople={ this.state.people.length }
+                            onTogglePeople={(id) => {
+                                let a = Array.from(this.state.people);
+                                if(!a.includes(id)) a.push(id);
+                                else a.splice(a.findIndex(io => io === id), 1);
+                                this.setState(() => ({
+                                    people: a
+                                }));
+                            }}
                         />
                     </div>
                 </div>

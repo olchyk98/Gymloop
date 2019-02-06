@@ -55,6 +55,7 @@ const UserType = new GraphQLObjectType({
         login: { type: GraphQLString },
         password: { type: GraphQLString },
         email: { type: GraphQLString },
+        avatar: { type: GraphQLString },
         mainActivity: { type: GraphQLString },
         height: { type: GraphQLInt }, // in cm
         age: { type: GraphQLInt },
@@ -345,6 +346,28 @@ const RootQuery = new GraphQLObjectType({
                 let a = await User.findOne({ login });
                 return !!a;
             }
+        },
+        getTrainingPeopleSuggestions: {
+            type: new GraphQLList(UserType),
+            args: {
+                offsetID: { type: GraphQLID },
+                limit: { type: GraphQLInt },
+                name: { type: GraphQLString }
+            },
+            resolve(_, { offsetID, limit, name }, { req }) {
+                if(!req.session.authToken || !req.session.id)
+                    throw new AuthenticationError("Not authenticated");
+
+                let a = {
+                    _id: {
+                        $ne: req.session.id,
+                        $gt: offsetID || 0
+                    }
+                }
+                if(name) a.name = new RegExp(name, "i");
+
+                return User.find(a).limit(limit || 0);
+            }
         }
     }
 });
@@ -371,6 +394,7 @@ const RootMutation = new GraphQLObjectType({
                     firstLogin: new Date,
                     authTokens: [token],
                     weight: 0,
+                    avatar: '/files/default/avatar.png',
                     age: 0,
                     appActivity: [
                         getDayDate()

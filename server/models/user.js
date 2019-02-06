@@ -8,6 +8,7 @@ const UserSchema = new Schema({
     mainActivity: String,
     firstLogin: Date,
     authTokens: Array,
+    avatar: String,
     weight: Number,
     appActivity: Array,
     height: Number,

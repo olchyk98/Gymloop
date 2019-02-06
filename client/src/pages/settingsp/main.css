@@ -84,3 +84,21 @@
 .rn-settings-submit.submitting {
     background:transparent;
 }
+
+.rn-settings-avatar {
+    --size:45px;
+
+    height:var(--size);
+    width:var(--size);
+    border-radius:50%;
+    overflow:hidden;
+    cursor:pointer;
+    position:relative;
+}
+
+.rn-settings-avatar > img {
+    height:100%;
+    width:100%;
+    object-fit:cover;
+    object-position:center;
+}

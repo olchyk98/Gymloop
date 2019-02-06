@@ -9,6 +9,8 @@ import LoadIcon from '../__forall__/load.icon';
 import Slider from '../__forall__/slider'; 
 import ActivityField from '../__forall__/activity.field';
 
+const image = "https://kooledge.com/assets/default_medium_avatar-57d58da4fc778fbd688dcbc4cbc47e14ac79839a9801187e42a796cbd6569847.png";
+
 class TxtField extends Component {
     render() {
         return(
@@ -161,6 +163,12 @@ class Hero extends Component {
             return(
                 <form className="rn rn_nav rn-settings" onSubmit={ e => { e.preventDefault(); this.submitSettings() } }>
                     <h1 className="rn-settings-title">Your settings</h1>
+                    <label className="rn-settings-avatar">
+                        <img
+                            alt="avatar"
+                            src={ image }
+                        />
+                    </label>
                     <div className="rn-settings-row">
                         <div className="rn-settings-container">
                             <Slider
