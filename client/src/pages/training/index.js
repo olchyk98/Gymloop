@@ -10,6 +10,8 @@ import LoadIcon from '../__forall__/load.icon';
 import Slider from '../__forall__/slider';
 import ActivityField from '../__forall__/activity.field';
 
+const image = "https://cdn.dribbble.com/users/2547736/screenshots/5794274/attachments/1249446/thumbnail/calculator_-_step_6_cardio___fitness.png";
+
 const inviteSuggLimit = 15;
 
 class PeopleFieldItem extends PureComponent {
@@ -232,10 +234,46 @@ class TrainingEditor extends Component {
     }
 }
 
+class TrainingsHistoryItemAuth extends PureComponent {
+    render() {
+        return(
+            <div className="rn-training-trhistory-mat-item-name_auth-auth-item">
+                <img
+                    alt="contributor"
+                    src={ image }
+                />
+                <span>Oles Odynets</span>
+            </div>
+        );
+    }
+}
+
 class TrainingsHistoryItem extends PureComponent {
     render() {
         return(
-            <div className="rn-training-trhistory-mat"></div>
+            <div className="rn-training-trhistory-mat-item">
+                <div className="rn-training-trhistory-mat-item-name_auth">
+                    <span className="rn-training-trhistory-mat-item-name_auth-name">Running</span>
+                    <div className="rn-training-trhistory-mat-item-name_auth-name-icon">
+                        <i className="fas fa-running" />
+                    </div>
+                    <div className="rn-training-trhistory-mat-item-name_auth-auth">
+                        <TrainingsHistoryItemAuth />
+                        <TrainingsHistoryItemAuth />
+                        <TrainingsHistoryItemAuth />
+                        <TrainingsHistoryItemAuth />
+                    </div>
+                </div>
+                <div className="rn-training-trhistory-mat-item-info">
+                    <span>23:32</span>
+                    <span>•</span>
+                    <span>132 calories</span>
+                    <span>•</span>
+                    <span>620 minutes</span>
+                    <span>•</span>
+                    <span>4 people</span>
+                </div>
+            </div>
         );
     }
 }
@@ -244,10 +282,14 @@ class TrainingsHistory extends Component {
     render() {
         return(
             <div className={ `rn-training-trhistory${ (!this.props.active) ? "" : " active" }` }>
-                <button className="definp rn-training-trhistory-close" onClick={ this.props.onClose }>
+                <button className="definp rn-training-trhistory-close close" onClick={ this.props.onClose }>
                     <i className="fas fa-times" />
                 </button>
                 <div className="rn-training-trhistory-mat">
+                    <TrainingsHistoryItem />
+                    <TrainingsHistoryItem />
+                    <TrainingsHistoryItem />
+                    <TrainingsHistoryItem />
                     <TrainingsHistoryItem />
                 </div>
             </div>
@@ -260,7 +302,7 @@ class Hero extends Component {
         super(props);
 
         this.state = {
-            historyOpened: false
+            historyOpened: true
         }
     }
 
