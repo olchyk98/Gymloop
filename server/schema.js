@@ -11,8 +11,11 @@ const {
 } = require('graphql');
 
 const {
+    GraphQLUpload,
     AuthenticationError
 } = require('apollo-server');
+
+const fs = require('fs');
 
 const {
     User,
@@ -44,8 +47,7 @@ function getDayDate() {
 
 const str = a => a.toString();
 
-// TODO: Training model
-// TODO: Sleep session model -> sleep qua, time, did you wke
+const getExtension = a => a.match(/[^\\]*\.(\w+)$/)[1];
 
 // !IN
 const UserType = new GraphQLObjectType({
@@ -604,6 +606,27 @@ const RootMutation = new GraphQLObjectType({
                     ...a,
                     ...b
                 });
+            }
+        },
+        setAccountAvatar: {
+            type: UserType,
+            args: {
+                avatar: { type: new GraphQLNonNull(GraphQLUpload) }
+            },
+            async resolve(_, { avatar }, { req }) {
+                if(!req.session.id || !req.session.authToken)
+                    throw new AuthenticationError("Not authenticated");
+
+                // Receive image
+                let { stream, filename } = await avatar;
+                const avatarP = '/files/avatars/' + generateNoise(128) + '.' + getExtension(filename);
+                stream.pipe(fs.createWriteStream('.' + avatarP));
+
+                return User.findOneAndUpdate({
+                    _id: req.session.id
+                }, {
+                    avatar: avatarP
+                }, (_, a) => a);
             }
         }
     }

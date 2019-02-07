@@ -1,5 +1,5 @@
 const { createServer } = require('http');
-const app = require('express')();
+const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const cookies = require('cookie-session');
 const mongoose = require('mongoose');
@@ -10,6 +10,9 @@ mongoose.connect("mongodb://oles:0password@ds213665.mlab.com:13665/gymloop-dev",
     useNewUrlParser: true
 });
 mongoose.connection.once("open", () => console.log("Server was connected to the database!"));
+
+// Create app instance
+const app = express();
 
 // Express middlewares
 app.use(new cookies({
@@ -23,6 +26,9 @@ app.use(new cookies({
         'J5V6TtwhDAVRuska'
     ]
 }));
+
+// Allow users to use server files
+app.use('/files', express.static('./files'));
 
 // ...
 const server = new ApolloServer({

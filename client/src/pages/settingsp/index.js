@@ -5,11 +5,10 @@ import { connect } from 'react-redux';
 import { gql } from 'apollo-boost';
 
 import client from  '../../apollo';
+import api from '../../api';
 import LoadIcon from '../__forall__/load.icon';
 import Slider from '../__forall__/slider'; 
 import ActivityField from '../__forall__/activity.field';
-
-const image = "https://kooledge.com/assets/default_medium_avatar-57d58da4fc778fbd688dcbc4cbc47e14ac79839a9801187e42a796cbd6569847.png";
 
 class TxtField extends Component {
     render() {
@@ -45,7 +44,8 @@ class Hero extends Component {
                 login: "",
                 password: "",
                 email: "",
-                mainActivity: ""
+                mainActivity: "",
+                avatar: ""
             }
         }
     }
@@ -73,7 +73,8 @@ class Hero extends Component {
                         login,
                         email,
                         mainActivity,
-                        caloriesPerDay
+                        caloriesPerDay,
+                        avatar
                     }
                 } 
             `
@@ -89,7 +90,8 @@ class Hero extends Component {
                     caloriesPerDay: a.caloriesPerDay || 0,
                     login: a.login || "",
                     email: a.email || "",
-                    mainActivity: a.mainActivity || ""
+                    mainActivity: a.mainActivity || "",
+                    avatar: a.avatar || undefined
                 }
             }));
         }).catch((e) => {
@@ -158,15 +160,64 @@ class Hero extends Component {
         });
     }
 
+    uploadAvatar = file => {
+        if(!file) return;
+
+        this.setState(() => ({
+            submittingSettings: true
+        }));
+
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        client.mutate({
+            mutation: gql`
+                mutation($avatar: Upload!) {
+                    setAccountAvatar(avatar: $avatar) {
+                        id,
+                        avatar
+                    }
+                } 
+            `,
+            variables: {
+                avatar: file
+            }
+        }).then(({ data: { setAccountAvatar: a } }) => {
+            this.setState(() => ({
+                submittingSettings: false
+            }));
+
+            if(!a) return castError();
+
+            this.setState(({ settings: b }) => ({
+                settings: {
+                    ...b,
+                    avatar: a.avatar
+                }
+            }), () => this.forceUpdate());
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
+    }
+
     render() {
         if(this.state.apiLoaded) {
             return(
                 <form className="rn rn_nav rn-settings" onSubmit={ e => { e.preventDefault(); this.submitSettings() } }>
                     <h1 className="rn-settings-title">Your settings</h1>
-                    <label className="rn-settings-avatar">
+                    <input
+                        className="hidden"
+                        accept="image/*"
+                        type="file"
+                        id="rn-settings-avatarf"
+                        onChange={ ({ target: { files } }) => (files) ? this.uploadAvatar(files[0]) : null } // User can cancel dialog window
+                    />
+                    <label className="rn-settings-avatar" htmlFor="rn-settings-avatarf">
                         <img
                             alt="avatar"
-                            src={ image }
+                            src={ api.storage + this.state.settings.avatar }
                         />
                     </label>
                     <div className="rn-settings-row">
