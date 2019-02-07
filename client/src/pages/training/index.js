@@ -235,7 +235,7 @@ class TrainingEditor extends Component {
 class TrainingsHistoryItem extends PureComponent {
     render() {
         return(
-            <div></div>
+            <div className="rn-training-trhistory-mat"></div>
         );
     }
 }
