@@ -6,8 +6,9 @@ import { gql } from 'apollo-boost';
 
 import client from  '../../apollo';
 import api from '../../api';
+import { cookieControl } from '../../utils';
 import LoadIcon from '../__forall__/load.icon';
-import Slider from '../__forall__/slider'; 
+import Slider from '../__forall__/slider';
 import ActivityField from '../__forall__/activity.field';
 
 class TxtField extends Component {
@@ -202,6 +203,12 @@ class Hero extends Component {
         });
     }
 
+    logout = () => {
+        cookieControl.delete('userid');
+        this.props.history.push('/');
+        window.location.reload();
+    }
+
     render() {
         if(this.state.apiLoaded) {
             return(
@@ -290,6 +297,12 @@ class Hero extends Component {
                                 <LoadIcon />
                             )
                         }
+                    </button>
+                    <button
+                        type="button"
+                        onClick={ this.logout }
+                        className={ `definp rn-settings-submit logout${ (!this.state.submittingSettings) ? "" : " submitting" }` }>
+                        Logout
                     </button>
                 </form>
             );

@@ -50,7 +50,7 @@ class Hero extends Component {
                         connectionsInt
                     }
                 }
-            `
+            `,
         }).then(({ data: { user: a } }) => {
             if(!a) {
                 this.props.castAlert(onError);

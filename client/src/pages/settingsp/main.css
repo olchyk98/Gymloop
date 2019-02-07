@@ -79,6 +79,11 @@
     align-items:center;
     justify-content:center;
     transition:.25s;
+    margin-top:12.5px;
+}
+
+.rn-settings-submit.logout {
+    background:red;   
 }
 
 .rn-settings-submit.submitting {

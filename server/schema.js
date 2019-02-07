@@ -354,19 +354,20 @@ const RootQuery = new GraphQLObjectType({
             args: {
                 offsetID: { type: GraphQLID },
                 limit: { type: GraphQLInt },
-                name: { type: GraphQLString }
+                login: { type: GraphQLString }
             },
-            resolve(_, { offsetID, limit, name }, { req }) {
+            resolve(_, { offsetID, limit, login }, { req }) {
                 if(!req.session.authToken || !req.session.id)
                     throw new AuthenticationError("Not authenticated");
 
                 let a = {
                     _id: {
-                        $ne: req.session.id,
-                        $gt: offsetID || 0
+                        $ne: req.session.id
                     }
                 }
-                if(name) a.name = new RegExp(name, "i");
+
+                if(offsetID) a._id.$gt = offsetID;
+                if(login) a.login = new RegExp(login, "i");
 
                 return User.find(a).limit(limit || 0);
             }
@@ -627,6 +628,34 @@ const RootMutation = new GraphQLObjectType({
                 }, {
                     avatar: avatarP
                 }, (_, a) => a);
+            }
+        },
+        createTraining: {
+            type: TrainingType,
+            args: {
+                calories: { type: new GraphQLNonNull(GraphQLInt) },
+                minutes: { type: new GraphQLNonNull(GraphQLInt) },
+                action: { type: new GraphQLNonNull(GraphQLString) },
+                peopleID: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))) } 
+            },
+            async resolve(_, { calories, minutes, action, peopleID }, { req }) {
+                if(!req.session.id || !req.session.authToken)
+                    throw new AuthenticationError("Not authenticated");
+
+                const a = (
+                    new Training({
+                        destroyedCalories: calories,
+                        minutes,
+                        time: +new Date,
+                        action,
+                        peopleID: [
+                            ...peopleID.map(io => str(io)),
+                            str(req.session.id)
+                        ]
+                    })
+                ).save();
+
+                return a;
             }
         }
     }

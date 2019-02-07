@@ -25,15 +25,15 @@ const client = new ApolloClient({
 	cache: new InMemoryCache(),
 	// disable cache
 	defaultOptions: {
-      watchQuery: {
-        fetchPolicy: 'network-only',
-        errorPolicy: 'ignore',
-      },
-      query: {
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-      },
-    }
+		watchQuery: {
+			fetchPolicy: 'network-only',
+			errorPolicy: 'ignore',
+		},
+		query: {
+			fetchPolicy: 'network-only',
+			errorPolicy: 'all',
+		},
+  }
 });
 
 export default client;
