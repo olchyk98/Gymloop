@@ -47,7 +47,8 @@ class Hero extends Component {
                         burnedCaloriesMonth,
                         weight,
                         avgSleepTime,
-                        connectionsInt
+                        connectionsInt,
+                        connectionsSameActivityInt
                     }
                 }
             `,
@@ -140,7 +141,7 @@ class Hero extends Component {
                             )
                         }
                         {
-                            (!this.state.userData || this.state.userData.mainActivity !== "?") ? (
+                            (!this.state.userData || this.state.userData.mainActivity !== "?") ? ( // IDEA: Render only when value > 0
                                 <div className="rn-home-mainact-connections">
                                     <div className="rn-home-mainact-connections-icon">
                                         <i className="fas fa-running" />
@@ -148,7 +149,7 @@ class Hero extends Component {
                                     <span className="rn-home-mainact-connections-text">
                                         {
                                             (this.state.userData !== false) ? (
-                                                <strong>0</strong>
+                                                <strong>{ this.state.userData.connectionsSameActivityInt }</strong>
                                             ) : (
                                                 <Placeholder
                                                     _style={{

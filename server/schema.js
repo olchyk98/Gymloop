@@ -204,14 +204,23 @@ const UserType = new GraphQLObjectType({
         connectionsInt: {
             type: GraphQLInt,
             async resolve({ id }) {
-                const a = Training.find({
+                const a = await Training.find({
                     people: {
                         $in: [str(id)]
                     }
                 }).select("people");
 
+                /* I could just use Set instead of forEach and an array,
+                but it would be bad for the resolver performance */
 
-                return (a.length) ? a.reduce((a, { people: b }) => a + b.length - 1) : 0; // NOTE: - self
+                if(a.length) {
+                    var b = a.map(io => io.people).flat(),
+                    c = [];
+
+                    b.forEach( io => (!c.includes(io) && str(io) !== str(id)) ? c.push(io) : null );
+                }
+            
+                return (c) ? c.length : 0;
             }
         },
         appActivity: { type: new GraphQLList(GraphQLString) },
@@ -268,6 +277,34 @@ const UserType = new GraphQLObjectType({
 
                 return a;
             }
+        },
+        connectionsSameActivityInt: {
+            type: GraphQLInt,
+            async resolve({ id, mainActivity }) {
+                let a = await Training.find({
+                    people: {
+                        $in: [str(id)]
+                    }
+                }).select("people");
+
+                if(!a.length) return 0;
+
+                // --- COPY - PASTE -- //
+                const b = a.map(io => io.people).flat(),
+                      c = [];
+
+                    b.forEach( io => (!c.includes(io) && str(io) !== str(id)) ? c.push(io) : null ); // ids
+                // --- COPY - PASTE -- //
+
+                const d = await User.countDocuments({
+                    _id: {
+                        $in: c
+                    },
+                    mainActivity
+                });
+
+                return d || 0;
+            }
         }
     })
 });
@@ -296,6 +333,19 @@ const TrainingType = new GraphQLObjectType({
         minutes: { type: GraphQLInt },
         time: { type: GraphQLString },
         action: { type: GraphQLString },
+        title: {
+            type: GraphQLString,
+            resolve: ({ action }) => ({
+                "RUNNING_LABEL": "Running",
+                "WALKING_LABEL": "Walking",
+                "SKIING_LABEL": "Skiing",
+                "SWIMMING_LABEL": "swimming",
+                "NORDIC_SKIING": "Nordic Skiing",
+                "TENNIS_LABEL": "Tennis",
+                "FISHING_LABEL": "Fishing",
+                "GYM_LABEL": "Gym"
+            })[action]
+        },
         people: {
             type: new GraphQLList(UserType),
             resolve: ({ people }) => User.find({
@@ -642,19 +692,33 @@ const RootMutation = new GraphQLObjectType({
                 if(!req.session.id || !req.session.authToken)
                     throw new AuthenticationError("Not authenticated");
 
+                const people = [
+                    ...peopleID.map(io => str(io)),
+                    str(req.session.id)
+                ];
+
                 const a = (
                     new Training({
                         destroyedCalories: calories,
                         minutes,
                         time: +new Date,
                         action,
-                        peopleID: [
-                            ...peopleID.map(io => str(io)),
-                            str(req.session.id)
-                        ]
+                        people
                     })
                 ).save();
+                
+                // Record users activity
+                await User.updateMany({
+                    _id: {
+                        $in: people
+                    }
+                }, {
+                    $push: {
+                        appActivity: getDayDate()
+                    }
+                });
 
+                // Return training
                 return a;
             }
         }

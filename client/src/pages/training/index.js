@@ -10,8 +10,6 @@ import LoadIcon from '../__forall__/load.icon';
 import Slider from '../__forall__/slider';
 import ActivityField from '../__forall__/activity.field';
 
-const image = "https://cdn.dribbble.com/users/2547736/screenshots/5794274/attachments/1249446/thumbnail/calculator_-_step_6_cardio___fitness.png";
-
 const inviteSuggLimit = 15;
 
 class PeopleFieldItem extends PureComponent {
@@ -226,7 +224,13 @@ class TrainingEditor extends Component {
                         className="definp rn-training-create-submit"
                         disabled={ this.state.creatingItem }
                         onClick={ this.createTraining }>
-                        Record training
+                        {
+                            (!this.state.creatingItem) ? (
+                                <>Record training</>
+                            ) : (
+                                <LoadIcon />
+                            )
+                        }
                     </button>
                 </div>
             </div>
@@ -240,38 +244,50 @@ class TrainingsHistoryItemAuth extends PureComponent {
             <div className="rn-training-trhistory-mat-item-name_auth-auth-item">
                 <img
                     alt="contributor"
-                    src={ image }
+                    src={ api.storage + this.props.avatar }
                 />
-                <span>Oles Odynets</span>
+                <span>{ this.props.login }</span>
             </div>
         );
     }
 }
 
 class TrainingsHistoryItem extends PureComponent {
+    convertTime(time) { // clr func
+        const a = new Date(+time),
+              b = b => (b.toString().length === 2) ? b : "0" + b;
+
+        return `${ b(a.getHours()) }:${ b(a.getMinutes()) }`;
+    }
+
     render() {
         return(
             <div className="rn-training-trhistory-mat-item">
                 <div className="rn-training-trhistory-mat-item-name_auth">
-                    <span className="rn-training-trhistory-mat-item-name_auth-name">Running</span>
+                    <span className="rn-training-trhistory-mat-item-name_auth-name">{ this.props.title }</span>
                     <div className="rn-training-trhistory-mat-item-name_auth-name-icon">
                         <i className="fas fa-running" />
                     </div>
                     <div className="rn-training-trhistory-mat-item-name_auth-auth">
-                        <TrainingsHistoryItemAuth />
-                        <TrainingsHistoryItemAuth />
-                        <TrainingsHistoryItemAuth />
-                        <TrainingsHistoryItemAuth />
+                        {
+                            this.props.people.map(({ id, login, avatar }) => (
+                                <TrainingsHistoryItemAuth
+                                    key={ id }
+                                    login={ login }
+                                    avatar={ avatar }
+                                />       
+                            ))
+                        }
                     </div>
                 </div>
                 <div className="rn-training-trhistory-mat-item-info">
-                    <span>23:32</span>
+                    <span>{ this.convertTime(this.props.time) }</span>
                     <span>•</span>
-                    <span>132 calories</span>
+                    <span>{ this.props.calories } calories</span>
                     <span>•</span>
-                    <span>620 minutes</span>
+                    <span>{ this.props.minutes } minutes</span>
                     <span>•</span>
-                    <span>4 people</span>
+                    <span>{ this.props.people.length } people</span>
                 </div>
             </div>
         );
@@ -286,11 +302,23 @@ class TrainingsHistory extends Component {
                     <i className="fas fa-times" />
                 </button>
                 <div className="rn-training-trhistory-mat">
-                    <TrainingsHistoryItem />
-                    <TrainingsHistoryItem />
-                    <TrainingsHistoryItem />
-                    <TrainingsHistoryItem />
-                    <TrainingsHistoryItem />
+                    {
+                        (this.props.history) ? (
+                            this.props.history.map(({ id, title, action, people, minutes, destroyedCalories, time }) => (
+                                <TrainingsHistoryItem
+                                    key={ id }
+                                    title={ title }
+                                    action={ action }
+                                    people={ people }
+                                    minutes={ minutes }
+                                    calories={ destroyedCalories }
+                                    time={ time }
+                                />           
+                            ))
+                        ) : (
+                            <LoadIcon />
+                        )
+                    }
                 </div>
             </div>
         );
@@ -302,12 +330,57 @@ class Hero extends Component {
         super(props);
 
         this.state = {
-            historyOpened: true
+            historyOpened: false,
+            history: null
         }
     }
 
     componentDidMount() {
         this.props.notifyLoaded();
+    }
+
+    fetchHistory = () => {
+        const castError = () => this.props.castAlert({
+            text: "Something went wrong"
+        });
+
+        if(!this.state.history) {
+            this.setState(() => ({
+                history: false
+            }));
+        }
+
+        client.query({
+            query: gql`
+                query {
+                    user {
+                        id,
+                        trainings {
+                            id,
+                            title,
+                            action,
+                            people {
+                                id,
+                                avatar,
+                                login
+                            },
+                            minutes,
+                            destroyedCalories,
+                            time
+                        }
+                    }
+                }
+            `
+        }).then(({ data: { user: a } }) => {
+            if(!a) return castError();
+
+            this.setState(() => ({
+                history: a.trainings
+            }))
+        }).catch((e) => {
+            console.error(e);
+            castError();
+        });
     }
 
     render() {
@@ -319,12 +392,18 @@ class Hero extends Component {
                     <p className="rn-training-info-desc">Or just view your trainings history</p>
                     <button
                         className="rn-training-info-historybtn definp"
-                        onClick={ () => this.setState({ historyOpened: true }) }>
+                        onClick={() => {
+                            this.setState(() => ({
+                                historyOpened: true
+                            }));
+                            this.fetchHistory();
+                        }}>
                         View history
                     </button>
                 </div>
                 <TrainingsHistory
                     active={ this.state.historyOpened }
+                    history={ this.state.history }
                     onClose={ () => this.setState({ historyOpened: false }) }
                 />
                 <TrainingEditor

@@ -34,7 +34,7 @@ const NeedleRoute = ({ path, condition, component: Component, redirect: Redirect
 	<Route
 		path={ path }
 		{ ...settings }
-		component={props => (condition) ? <Component { ...props } /> : <Redirect { ...props } to={ Redirect } /> }
+		component={ props => (condition) ? <Component { ...props } /> : <Redirect { ...props } to={ Redirect } /> }
 	/>
 );
 
